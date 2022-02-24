@@ -1,0 +1,22 @@
+@prefix p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+
+<#PersonMapping>
+  rml:logicalSource [
+    rml:source "persons.ttl";
+    rml:referenceFormulation ql:Sparql;
+    rml:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person WHERE {?person a p:Person}" ];
+	
+	rml:container "/characters";
+	rml:snippet "<character id='${?person}'></character>".
+	
+
+<#PersonAttributeMapping>
+  rml:logicalSource [
+    rml:source "persons.ttl";
+    rml:referenceFormulation ql:Sparql;
+    rml:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person ?firstName ?lastName ?hairColor WHERE {?person a p:Person; p:hasFirstName ?firstName; p:hasLastName ?lastName; p:hasHairColor ?hairColor}" ];
+	
+	rml:container "/characters/character[@id=${?person}]";
+	rml:snippet "<firstName>${?firstName}</firstName><lastName>${?lastName}</lastName><hair>${?hairColor}</hair>".

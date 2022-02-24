@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<characters>
+	<character id="person1">
+		<firstname>Ash</firstname>
+		<lastname>Ketchum</lastname>
+		<hair>black</hair>
+	</character>
+	<character id="person2">
+		<firstname>Misty</firstname>
+		<hair>orange</hair>
+	</character>
+</characters>
