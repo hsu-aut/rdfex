@@ -51,7 +51,7 @@ public class Owl2XmlMapper {
 			String mappingSource = mappingDefinition.getLiteral("source").toString();
 			Path directory = path.getParent();
 			Path mappingSourcePath = directory.resolve(Paths.get(mappingSource));
-//			Path mappingSourcePath = Paths.get(directory, mappingSource);
+			// Path mappingSourcePath = Paths.get(directory, mappingSource);
 			Model sourceModel = getModelFromFile(mappingSourcePath);
 
 			// fire SPARQL query
@@ -63,44 +63,42 @@ public class Owl2XmlMapper {
 			ResultSet resultSet = qexec.execSelect();
 			List<QuerySolution> results = ResultSetFormatter.toList(resultSet);
 
-			// execute XPath to get the container
+			// execute XPath to get the container (with placeholders)
 			String containerString = mappingDefinition.getLiteral("container").toString();
-			XPath xPath = XPathFactory.newDefaultInstance().newXPath();
-
-			NodeList containerNodes = null;
-			try {
-				containerNodes = (NodeList) xPath.compile(containerString).evaluate(doc, XPathConstants.NODESET);
-			} catch (XPathExpressionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			// fill possible placeholders
+			List<String> containers = this.fillPlaceholders(containerString, results);
 			
-			// If the container doesn't exist -> Create it (and make sure to check for variables first)
-			
-			String snippet = mappingDefinition.getLiteral("snippet").toString();
-			
-			// enrich snippet with each query result
-			List<String> snippetList = new ArrayList();
-			for (QuerySolution result : results) {
-				Pattern pattern = Pattern.compile("(\\$\\{\\?{0,1}\\w*\\})");
-				Matcher matcher = pattern.matcher(snippet);
-				List<String> allMatches = new ArrayList<String>();
-				while (matcher.find()) {
-					allMatches.add(matcher.group());
+			for (String container : containers) {
+				XPath xPath = XPathFactory.newDefaultInstance().newXPath();
+				
+				NodeList containerNodes = null;
+				try {
+					containerNodes = (NodeList) xPath.compile(containerString).evaluate(doc, XPathConstants.NODESET);
+				} catch (XPathExpressionException e) {
+					// TODO Auto-generated catch block
+					// TODO: Implement creating new container nodes
+					System.out.println("The container node doesn't exist. Creating new container nodes is not implemented yet.");
+					e.printStackTrace();
 				}
-			}
-			
-			// for each container result
-			for (int i = 0; i < containerNodes.getLength(); i++) {
-				Node containerNode = containerNodes.item(i);
-
+				
+				
+				String snippet = mappingDefinition.getLiteral("snippet").toString();
+				List<String> completedSnippets = this.fillPlaceholders(snippet, results);
+				
+				// for each container result
+				for (int i = 0; i < containerNodes.getLength(); i++) {
+					Node containerNode = containerNodes.item(i);
+					
+					// add enriched snippet to XML
+					for (String completedSnippet : completedSnippets) {
+						containerNode.setTextContent(completedSnippet);
+						doc.appendChild(containerNode);
+					}
+					
+				}
 				
 			}
 			
-
-			
-
-			// add enriched snippet to XML
 
 		}
 
@@ -147,6 +145,34 @@ public class Owl2XmlMapper {
 
 		ResultSet results = qexec.execSelect();
 		return ResultSetFormatter.toList(results);
+	}
+	
+	
+	/**
+	 * Take a string containing ${?...} placeholders and fill it with sparql results
+	 * @param stringWithPlaceholder
+	 * @param sparqlResults
+	 * @return
+	 */
+	public List<String> fillPlaceholders(String stringWithPlaceholder, List<QuerySolution> sparqlResults) {
+		// Get all template strings
+		Pattern pattern = Pattern.compile("(\\$\\{\\?\\w*\\})");
+		Matcher matcher = pattern.matcher(stringWithPlaceholder);
+		List<String> allMatches = new ArrayList<String>();
+		while (matcher.find()) {
+			allMatches.add(matcher.group());
+		}
+		
+		List<String> completedStrings = new ArrayList<String>();
+		for (QuerySolution result : sparqlResults) {
+			String completedString = stringWithPlaceholder;
+			for (String match : allMatches) {
+				String varName = match.substring(3, match.length()-1);
+				completedString = completedString.replace(match, result.get(varName).toString());
+			}			
+			completedStrings.add(completedString);
+		}
+		return completedStrings;
 	}
 
 }
