@@ -28,18 +28,22 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class Owl2XmlMapper {
 
+	// Output XML document
+	Document doc;
+	
 	public Document map(Path path) throws ParserConfigurationException {
 		// Create mapping model
 		Model mappingModel = this.getModelFromFile(path);
 
 		// Create empty XML file
 		DocumentBuilder docBuilder = DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder();
-		Document doc = docBuilder.newDocument();
+		this.doc = docBuilder.newDocument();
 
 		// Get all mapping definitions
 		List<QuerySolution> mappings = this.getAllMappingDefinitions(mappingModel);
@@ -74,10 +78,14 @@ public class Owl2XmlMapper {
 				NodeList containerNodes = null;
 				try {
 					containerNodes = (NodeList) xPath.compile(containerString).evaluate(doc, XPathConstants.NODESET);
+					
+					// Create new container nodes if XPath doesn't return any
+					if (containerNodes.getLength() == 0) {
+						Node containerStructure = this.createContainerStructure(container);
+						doc.appendChild(containerStructure);
+					}
 				} catch (XPathExpressionException e) {
 					// TODO Auto-generated catch block
-					// TODO: Implement creating new container nodes
-					System.out.println("The container node doesn't exist. Creating new container nodes is not implemented yet.");
 					e.printStackTrace();
 				}
 				
@@ -85,17 +93,17 @@ public class Owl2XmlMapper {
 				String snippet = mappingDefinition.getLiteral("snippet").toString();
 				List<String> completedSnippets = this.fillPlaceholders(snippet, results);
 				
-				// for each container result
-				for (int i = 0; i < containerNodes.getLength(); i++) {
-					Node containerNode = containerNodes.item(i);
-					
-					// add enriched snippet to XML
-					for (String completedSnippet : completedSnippets) {
-						containerNode.setTextContent(completedSnippet);
-						doc.appendChild(containerNode);
-					}
-					
-				}
+//				// for each container result
+//				for (int i = 0; i < containerNodes.getLength(); i++) {
+//					Node containerNode = containerNodes.item(i);
+//					
+//					// add enriched snippet to XML
+//					for (String completedSnippet : completedSnippets) {
+//						containerNode.setTextContent(completedSnippet);
+//						doc.appendChild(containerNode);
+//					}
+//					
+//				}
 				
 			}
 			
@@ -156,12 +164,7 @@ public class Owl2XmlMapper {
 	 */
 	public List<String> fillPlaceholders(String stringWithPlaceholder, List<QuerySolution> sparqlResults) {
 		// Get all template strings
-		Pattern pattern = Pattern.compile("(\\$\\{\\?\\w*\\})");
-		Matcher matcher = pattern.matcher(stringWithPlaceholder);
-		List<String> allMatches = new ArrayList<String>();
-		while (matcher.find()) {
-			allMatches.add(matcher.group());
-		}
+		List<String> allMatches = this.findAllRegexMatches(stringWithPlaceholder, "(\\$\\{\\?\\w*\\})");
 		
 		List<String> completedStrings = new ArrayList<String>();
 		for (QuerySolution result : sparqlResults) {
@@ -174,5 +177,70 @@ public class Owl2XmlMapper {
 		}
 		return completedStrings;
 	}
+	
+	
+	
+	// TODO: Continue with this method so that in the case of empty documents / non-found containers new containers are created	
+	private Node createContainerStructure(String container) {
+		//Xpath \/(\w-*)+(\[.+\])?
+//		Pattern pattern = Pattern.compile("(\\$\\{\\?\\w*\\})");
+		Pattern pattern = Pattern.compile("\\/(\\w-*)+(\\[.+\\])?");
+		Matcher matcher = pattern.matcher(container);
+		// for every match: create a node and create a tree
+		Node rootNode = null;
+		Node parentNode = null;
+		int counter = 0;
+		while (matcher.find()) {
+			// Clear matches from invalid characters
+			String elementName = matcher.group().substring(1);
+			// find complete brackets (\[.+\])?
+			// separate attributes. 
+			// Assumption: Three groups are found
+			// 1: Complete bracket: [@id = asd]
+			// 2: Attribute only: id
+			// 3: Value only: asd
+			List<String> attributeMatches = this.findAllRegexMatches(elementName, "(\\[@(\\w+)=(.*)\\])");
+			if (attributeMatches.size() > 0) {
+				elementName = elementName.substring(0, elementName.length()-attributeMatches.get(1).length());
+			}
+			
+			if(counter == 0) {
+				rootNode = this.doc.createElement(elementName);
+				if (attributeMatches.size() > 0) {
+					String attributeName = attributeMatches.get(2);
+					String attributeValue = attributeMatches.get(3);
+					((Element) parentNode).setAttribute(attributeName, attributeValue);
+				}
+				parentNode = rootNode;
+			}
+			
+			
+			if (counter > 0) {
+				Node node = this.doc.createElement(elementName);
+				if (attributeMatches.size() > 0) {
+					String attributeName = attributeMatches.get(2);
+					String attributeValue = attributeMatches.get(3);
+					((Element) node).setAttribute(attributeName, attributeValue);
+				}
+				parentNode.appendChild(node);
+				parentNode = node;
+			}
+			counter ++;
+		}
+		return rootNode;
+	}
 
+	
+	private List<String> findAllRegexMatches(String stringToSearch, String patternString) {
+		Pattern pattern = Pattern.compile(patternString);
+		Matcher matcher = pattern.matcher(stringToSearch);
+		List<String> allMatches = new ArrayList<String>();
+		while (matcher.find()) {
+			for (int i = 0; i <= matcher.groupCount(); i++) {
+				allMatches.add(matcher.group(i));
+			}	
+		}
+		return allMatches;
+	}
+	
 }
