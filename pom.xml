@@ -3,10 +3,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.hsu-hh.aut.ontologies</groupId>
-	<artifactId>owl2xml</artifactId>
+	<artifactId>olif</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>OWL2XML</name>
-	<description>An automated mapper to transform OWL ontologies into XML</description>
+	<name>Olif</name>
+	<description>An automated mapper to transform ontologies into data interchange formats such as XML or JSON</description>
 
 	<build>
 		<plugins>

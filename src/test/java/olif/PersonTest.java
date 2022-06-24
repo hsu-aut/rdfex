@@ -1,4 +1,4 @@
-package owl2xml;
+package olif;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,9 +17,7 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -38,13 +36,14 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+
 class PersonTest {
 
-	Owl2XmlMapper mapper;
+	MappingEngine mapper;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		this.mapper = new Owl2XmlMapper();
+		this.mapper = new MappingEngine();
 	}
 
 	// Should get the source model correctly

@@ -1,10 +1,9 @@
-package owl2xml;
+package olif;
 
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +31,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class Owl2XmlMapper {
+public class MappingEngine {
 
 	// Output XML document
 	Document doc;
