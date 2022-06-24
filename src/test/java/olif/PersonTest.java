@@ -28,7 +28,6 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,8 +48,6 @@ class PersonTest {
 	// Should get the source model correctly
 	// @Test
 	void shouldGetSource() throws URISyntaxException {
-//		URL resource = getClass().getClassLoader().getResource("persons/mapping.ttl");
-//		Path path = Paths.get(resource.toURI());
 		Path path = Paths.get("src", "test", "resources", "persons", "mapping.ttl");
 		Model model = this.mapper.getModelFromFile(path);
 
@@ -72,7 +69,7 @@ class PersonTest {
 	void shouldGiveTwoMappings() {
 		Path path = Paths.get("src", "test", "resources", "persons", "mapping.ttl");
 		Model model = this.mapper.getModelFromFile(path);
-		List<QuerySolution> mappings = this.mapper.getAllMappingDefinitions(model);
+		List<DataMap> mappings = this.mapper.getAllMappingDefinitions(model);
 		assertEquals(2, mappings.size());
 	}
 

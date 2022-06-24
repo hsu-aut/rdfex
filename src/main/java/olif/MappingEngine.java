@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,31 +36,36 @@ public class MappingEngine {
 
 	// Output XML document
 	Document doc;
-	
-	public Document map(Path path) throws ParserConfigurationException {
+
+	public Document map(Path mappingFilePath) throws ParserConfigurationException {
 		// Create mapping model
-		Model mappingModel = this.getModelFromFile(path);
+		Model mappingModel = this.getModelFromFile(mappingFilePath);
 
 		// Create empty XML file
 		DocumentBuilder docBuilder = DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder();
 		this.doc = docBuilder.newDocument();
 
 		// Get all mapping definitions
-		List<QuerySolution> mappings = this.getAllMappingDefinitions(mappingModel);
+		List<DataMap> mappings = this.getAllMappingDefinitions(mappingModel);
 
 		// For each mapping:
-		for (QuerySolution mappingDefinition : mappings) {
+		for (DataMap mappingDefinition : mappings) {
+			// Get the appropriate mapper
+			String targetFormat = mappingDefinition.getTargetFormat();
+			System.out.println(targetFormat);
+			Mapper mapper = MapperFactory.getMapper(targetFormat);
+
 			// open source file
 			// TODO (performance optimization) Put models in some kind of cache to not load one model twice
-			String mappingSource = mappingDefinition.getLiteral("source").toString();
-			Path directory = path.getParent();
+			String mappingSource = mappingDefinition.getSource();
+			Path directory = mappingFilePath.getParent();
 			Path mappingSourcePath = directory.resolve(Paths.get(mappingSource));
 			// Path mappingSourcePath = Paths.get(directory, mappingSource);
 			Model sourceModel = getModelFromFile(mappingSourcePath);
 
 			// fire SPARQL query
 			// TODO: Add all prefixes from mapping document into query header
-			String queryString = mappingDefinition.getLiteral("query").toString();
+			String queryString = mappingDefinition.getQuery();
 			Query mappingQuery = QueryFactory.create(queryString);
 			QueryExecution qexec = QueryExecutionFactory.create(mappingQuery, sourceModel);
 
@@ -67,17 +73,17 @@ public class MappingEngine {
 			List<QuerySolution> results = ResultSetFormatter.toList(resultSet);
 
 			// execute XPath to get the container (with placeholders)
-			String containerString = mappingDefinition.getLiteral("container").toString();
+			String containerString = mappingDefinition.getContainer();
 			// fill possible placeholders
 			List<String> containers = this.fillPlaceholders(containerString, results);
-			
+
 			for (String container : containers) {
 				XPath xPath = XPathFactory.newDefaultInstance().newXPath();
-				
+
 				NodeList containerNodes = null;
 				try {
 					containerNodes = (NodeList) xPath.compile(containerString).evaluate(doc, XPathConstants.NODESET);
-					
+
 					// Create new container nodes if XPath doesn't return any
 					if (containerNodes.getLength() == 0) {
 						Node containerStructure = this.createContainerStructure(container);
@@ -87,11 +93,10 @@ public class MappingEngine {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				
-				String snippet = mappingDefinition.getLiteral("snippet").toString();
+
+				String snippet = mappingDefinition.getSnippet();
 				List<String> completedSnippets = this.fillPlaceholders(snippet, results);
-				
+
 //				// for each container result
 //				for (int i = 0; i < containerNodes.getLength(); i++) {
 //					Node containerNode = containerNodes.item(i);
@@ -103,9 +108,8 @@ public class MappingEngine {
 //					}
 //					
 //				}
-				
+
 			}
-			
 
 		}
 
@@ -132,31 +136,33 @@ public class MappingEngine {
 		return model;
 	}
 
+	
 	/**
-	 * Retrieves all mapping definitions inside the current mapping
+	 * Retrieves all mapping definitions inside the current mapping and converts them into an easily accessible object that represents mapping definitions
 	 * 
 	 * @return All mapping definitions
 	 */
-	public List<QuerySolution> getAllMappingDefinitions(Model model) {
-		String queryString = "PREFIX rml: <http://semweb.mmlab.be/ns/rml#>"
-				+ "SELECT ?mappingDefinition ?source ?query ?container ?snippet WHERE {"
-				+ "?mappingDefinition rml:logicalSource ?logicalSource." 
-				+ "?logicalSource rml:source ?source;" 
-				+ "rml:query ?query." 
-				+ "?mappingDefinition rml:container ?container;"
-				+ "rml:snippet ?snippet." 
-				+ "}";
+	public List<DataMap> getAllMappingDefinitions(Model model) {
+		String queryString = "PREFIX ol: <http://www.hsu-hh.de/aut/ontologies/olif#>"
+				+ "SELECT ?mappingDefinition ?source ?sourceType ?targetFormat ?queryLanguage ?query ?container ?snippet WHERE {"
+				+ "?mappingDefinition ol:ontologicalSource ?ontologicalSource." + "?ontologicalSource ol:source ?source;" + "ol:sourceType ?sourceType;"
+				+ "ol:queryLanguage ?queryLanguage;" + "ol:query ?query." + "?mappingDefinition ol:container ?container;" + "ol:targetFormat ?targetFormat;"
+				+ "ol:snippet ?snippet." + "}";
 
 		Query mappingQuery = QueryFactory.create(queryString);
 		QueryExecution qexec = QueryExecutionFactory.create(mappingQuery, model);
 
 		ResultSet results = qexec.execSelect();
-		return ResultSetFormatter.toList(results);
+		List<QuerySolution> querySolutions = ResultSetFormatter.toList(results);
+
+		List<DataMap> dataMaps = querySolutions.stream().map(qS -> new DataMap(qS)).collect(Collectors.toList());
+		return dataMaps;
 	}
-	
+
 	
 	/**
 	 * Take a string containing ${?...} placeholders and fill it with sparql results
+	 * 
 	 * @param stringWithPlaceholder
 	 * @param sparqlResults
 	 * @return
@@ -164,24 +170,22 @@ public class MappingEngine {
 	public List<String> fillPlaceholders(String stringWithPlaceholder, List<QuerySolution> sparqlResults) {
 		// Get all template strings
 		List<String> allMatches = this.findAllRegexMatches(stringWithPlaceholder, "(\\$\\{\\?\\w*\\})");
-		
+
 		List<String> completedStrings = new ArrayList<String>();
 		for (QuerySolution result : sparqlResults) {
 			String completedString = stringWithPlaceholder;
 			for (String match : allMatches) {
-				String varName = match.substring(3, match.length()-1);
+				String varName = match.substring(3, match.length() - 1);
 				completedString = completedString.replace(match, result.get(varName).toString());
-			}			
+			}
 			completedStrings.add(completedString);
 		}
 		return completedStrings;
 	}
-	
-	
-	
-	// TODO: Continue with this method so that in the case of empty documents / non-found containers new containers are created	
+
+	// TODO: Continue with this method so that in the case of empty documents / non-found containers new containers are created
 	private Node createContainerStructure(String container) {
-		//Xpath \/(\w-*)+(\[.+\])?
+		// Xpath \/(\w-*)+(\[.+\])?
 //		Pattern pattern = Pattern.compile("(\\$\\{\\?\\w*\\})");
 		Pattern pattern = Pattern.compile("\\/(\\w-*)+(\\[.+\\])?");
 		Matcher matcher = pattern.matcher(container);
@@ -193,17 +197,17 @@ public class MappingEngine {
 			// Clear matches from invalid characters
 			String elementName = matcher.group().substring(1);
 			// find complete brackets (\[.+\])?
-			// separate attributes. 
+			// separate attributes.
 			// Assumption: Three groups are found
 			// 1: Complete bracket: [@id = asd]
 			// 2: Attribute only: id
 			// 3: Value only: asd
 			List<String> attributeMatches = this.findAllRegexMatches(elementName, "(\\[@(\\w+)=(.*)\\])");
 			if (attributeMatches.size() > 0) {
-				elementName = elementName.substring(0, elementName.length()-attributeMatches.get(1).length());
+				elementName = elementName.substring(0, elementName.length() - attributeMatches.get(1).length());
 			}
-			
-			if(counter == 0) {
+
+			if (counter == 0) {
 				rootNode = this.doc.createElement(elementName);
 				if (attributeMatches.size() > 0) {
 					String attributeName = attributeMatches.get(2);
@@ -212,8 +216,7 @@ public class MappingEngine {
 				}
 				parentNode = rootNode;
 			}
-			
-			
+
 			if (counter > 0) {
 				Node node = this.doc.createElement(elementName);
 				if (attributeMatches.size() > 0) {
@@ -224,12 +227,11 @@ public class MappingEngine {
 				parentNode.appendChild(node);
 				parentNode = node;
 			}
-			counter ++;
+			counter++;
 		}
 		return rootNode;
 	}
 
-	
 	private List<String> findAllRegexMatches(String stringToSearch, String patternString) {
 		Pattern pattern = Pattern.compile(patternString);
 		Matcher matcher = pattern.matcher(stringToSearch);
@@ -237,9 +239,9 @@ public class MappingEngine {
 		while (matcher.find()) {
 			for (int i = 0; i <= matcher.groupCount(); i++) {
 				allMatches.add(matcher.group(i));
-			}	
+			}
 		}
 		return allMatches;
 	}
-	
+
 }
