@@ -1,25 +1,31 @@
 @prefix p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> .
-@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
-@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>
 
-<#PersonMapping>
-  rml:logicalSource [
-    rml:source "persons.ttl";
-    rml:referenceFormulation ql:Sparql;
-    rml:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person WHERE {?person a p:Person}" ];
+<#PersonMapping> a ol:DataMap;
+	ol:ontologicalSource [
+		ol:source "persons.ttl";
+		ol:sourceType ol:File;
+		ol:queryLanguage ol:Sparql;
+		ol:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person WHERE {?person a p:Person}" 
+	];
+  
+	ol:targetFormat ol:XML;
+	ol:container "/characters";
+	ol:snippet "<character id='${?person}'></character>".
 	
-	rml:container "/characters";
-	rml:snippet "<character id='${?person}'></character>".
 	
 
-<#PersonAttributeMapping>
-  rml:logicalSource [
-    rml:source "persons.ttl";
-    rml:referenceFormulation ql:Sparql;
-    rml:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person ?firstName ?lastName ?hairColor WHERE {?person a p:Person; p:hasFirstName ?firstName; p:hasLastName ?lastName; p:hasHairColor ?hairColor}" ];
+<#PersonAttributeMapping> a ol:DataMap;
+	ol:ontologicalSource [
+		ol:source "persons.ttl";
+		ol:sourceType ol:File;
+		ol:queryLanguage ol:Sparql;
+		ol:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person ?firstName ?lastName ?hairColor WHERE {?person a p:Person; p:hasFirstName ?firstName; p:hasLastName ?lastName; p:hasHairColor ?hairColor}" 
+	];
 	
-	rml:container "/characters/character[@id=${?person}]";
-	rml:snippet "<firstName>${?firstName}</firstName><lastName>${?lastName}</lastName><hair>${?hairColor}</hair>".
+	ol:targetFormat ol:XML;
+	ol:container "/characters/character[@id=${?person}]";
+	ol:snippet "<firstName>${?firstName}</firstName><lastName>${?lastName}</lastName><hair>${?hairColor}</hair>".
 	
 	
 # Problem: Durch Regel 1 könnte die Struktur teilweise aufgebaut werden. Der Container von Regel 2 könnte aber trotzdem keine Treffer erzeugen, weil genau die IDs aus Regel noch nicht angelegt wurden.
