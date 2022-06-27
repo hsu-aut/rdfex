@@ -1,6 +1,7 @@
 package olif;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -25,21 +26,23 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.riot.RDFDataMgr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class MappingEngine {
 
 	// Output XML document
 	Document doc;
 
-	public Document map(Path mappingFilePath) throws ParserConfigurationException {
+	// Mmodel cache to store models once they're loaded to get them faster for subsequent uses of the same model
+	ModelCache modelCache = ModelCache.getInstance();
+
+	public Document map(Path mappingFilePath) throws ParserConfigurationException, SAXException, IOException {
 		// Create mapping model
-		Model mappingModel = this.getModelFromFile(mappingFilePath);
+		Model mappingModel = this.modelCache.getModel(mappingFilePath);
 
 		// Create empty XML file
 		DocumentBuilder docBuilder = DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder();
@@ -52,16 +55,14 @@ public class MappingEngine {
 		for (DataMap mappingDefinition : mappings) {
 			// Get the appropriate mapper
 			String targetFormat = mappingDefinition.getTargetFormat();
-			System.out.println(targetFormat);
 			Mapper mapper = MapperFactory.getMapper(targetFormat);
 
 			// open source file
 			// TODO (performance optimization) Put models in some kind of cache to not load one model twice
 			String mappingSource = mappingDefinition.getSource();
-			Path directory = mappingFilePath.getParent();
-			Path mappingSourcePath = directory.resolve(Paths.get(mappingSource));
-			// Path mappingSourcePath = Paths.get(directory, mappingSource);
-			Model sourceModel = getModelFromFile(mappingSourcePath);
+			Path mappingFileDirectory = mappingFilePath.getParent();
+			Path mappingSourcePath = mappingFileDirectory.resolve(Paths.get(mappingSource));
+			Model sourceModel = this.modelCache.getModel(mappingSourcePath);
 
 			// fire SPARQL query
 			// TODO: Add all prefixes from mapping document into query header
@@ -82,12 +83,11 @@ public class MappingEngine {
 
 				NodeList containerNodes = null;
 				try {
-					containerNodes = (NodeList) xPath.compile(containerString).evaluate(doc, XPathConstants.NODESET);
+					containerNodes = (NodeList) xPath.compile(container).evaluate(doc, XPathConstants.NODESET);
 
 					// Create new container nodes if XPath doesn't return any
-					if (containerNodes.getLength() == 0) {
-						Node containerStructure = this.createContainerStructure(container);
-						doc.appendChild(containerStructure);
+					if (containerNodes == null || containerNodes.getLength() == 0) {
+						containerNodes = this.createContainerStructure(container);
 					}
 				} catch (XPathExpressionException e) {
 					// TODO Auto-generated catch block
@@ -97,18 +97,19 @@ public class MappingEngine {
 				String snippet = mappingDefinition.getSnippet();
 				List<String> completedSnippets = this.fillPlaceholders(snippet, results);
 
-//				// for each container result
-//				for (int i = 0; i < containerNodes.getLength(); i++) {
-//					Node containerNode = containerNodes.item(i);
-//					
-//					// add enriched snippet to XML
-//					for (String completedSnippet : completedSnippets) {
-//						containerNode.setTextContent(completedSnippet);
-//						doc.appendChild(containerNode);
-//					}
-//					
-//				}
-
+				// Add completed snippets to containers
+				for (int i = 0; i < containerNodes.getLength(); i++) {
+					Node containerNode = containerNodes.item(i);
+					for (String completedSnippet : completedSnippets) {
+						Document tempDoc = docBuilder.parse(new ByteArrayInputStream(completedSnippet.getBytes()));
+						Node snippetNode = doc.importNode(tempDoc.getDocumentElement(), true);
+						containerNode.appendChild(snippetNode);
+					}
+					System.out.println("Container:" + container);
+					System.out.println("Adding containerNode: " + containerNode.getNodeName());
+					doc.appendChild(containerNode);
+				}
+			
 			}
 
 		}
@@ -116,27 +117,6 @@ public class MappingEngine {
 		return doc;
 	}
 
-	/**
-	 * Create a Jena model from the given mapping Turtle file
-	 * 
-	 * @param path Path to the mapping definition
-	 * @return Jena model of the mapping definition
-	 */
-	public Model getModelFromFile(Path path) {
-		// Create a model from the mapping file
-		InputStream in = RDFDataMgr.open(path.toString());
-		if (in == null) {
-			throw new IllegalArgumentException("File: " + path + " not found");
-		}
-
-		Model model = ModelFactory.createDefaultModel();
-		// read the file
-		// TODO: Get the real file format
-		model.read(in, null, "TTL");
-		return model;
-	}
-
-	
 	/**
 	 * Retrieves all mapping definitions inside the current mapping and converts them into an easily accessible object that represents mapping definitions
 	 * 
@@ -159,7 +139,6 @@ public class MappingEngine {
 		return dataMaps;
 	}
 
-	
 	/**
 	 * Take a string containing ${?...} placeholders and fill it with sparql results
 	 * 
@@ -170,68 +149,82 @@ public class MappingEngine {
 	public List<String> fillPlaceholders(String stringWithPlaceholder, List<QuerySolution> sparqlResults) {
 		// Get all template strings
 		List<String> allMatches = this.findAllRegexMatches(stringWithPlaceholder, "(\\$\\{\\?\\w*\\})");
-
 		List<String> completedStrings = new ArrayList<String>();
-		for (QuerySolution result : sparqlResults) {
-			String completedString = stringWithPlaceholder;
-			for (String match : allMatches) {
-				String varName = match.substring(3, match.length() - 1);
-				completedString = completedString.replace(match, result.get(varName).toString());
+		
+		if (allMatches.size() == 0) {
+			// If there are no placeholders, return the input string in a list
+			completedStrings.add(stringWithPlaceholder);
+		} else {
+			// if there are placeholders, replace them with the results
+			for (QuerySolution result : sparqlResults) {
+				String completedString = stringWithPlaceholder;
+				for (String match : allMatches) {
+					String varName = match.substring(3, match.length() - 1);
+					completedString = completedString.replace(match, result.get(varName).toString());
+				}
+				completedStrings.add(completedString);
 			}
-			completedStrings.add(completedString);
 		}
 		return completedStrings;
 	}
 
-	// TODO: Continue with this method so that in the case of empty documents / non-found containers new containers are created
-	private Node createContainerStructure(String container) {
-		// Xpath \/(\w-*)+(\[.+\])?
-//		Pattern pattern = Pattern.compile("(\\$\\{\\?\\w*\\})");
+
+	private NodeList createContainerStructure(String container) {
+		// First RegEx finds all slash-separated sub-paths of an XPath. These sub-paths might contain attribute conditions (e.g. [@name="asd"])
 		Pattern pattern = Pattern.compile("\\/(\\w-*)+(\\[.+\\])?");
 		Matcher matcher = pattern.matcher(container);
-		// for every match: create a node and create a tree
-		Node rootNode = null;
-		Node parentNode = null;
-		int counter = 0;
+
+		Node rootNode = this.doc.createElement("tempRootElememt");
+		Node parentNode = rootNode;
 		while (matcher.find()) {
-			// Clear matches from invalid characters
-			String elementName = matcher.group().substring(1);
+			matcher.group();
+			String elementName = matcher.group().substring(1); // Removes first slash
 			// find complete brackets (\[.+\])?
 			// separate attributes.
 			// Assumption: Three groups are found
-			// 1: Complete bracket: [@id = asd]
-			// 2: Attribute only: id
-			// 3: Value only: asd
+			// 1: Complete bracket: for example "[@id = asd]"
+			// 2: Attribute only: in the above example: "id"
+			// 3: Value only: in the above example "asd"
+
+			// Second RegEx: Within the current sub-path, find only the atttribute condition (e.g. [@name="asd"])
 			List<String> attributeMatches = this.findAllRegexMatches(elementName, "(\\[@(\\w+)=(.*)\\])");
+
+			// Create a new node. If there are attributes, create a node with attributes
+			Node node;
 			if (attributeMatches.size() > 0) {
 				elementName = elementName.substring(0, elementName.length() - attributeMatches.get(1).length());
+
+				String attributeName = attributeMatches.get(2);
+				String attributeValue = attributeMatches.get(3);
+				node = this.createNodeWithAttribute(elementName, attributeName, attributeValue);
+			} else {
+				node = this.createNodeWithAttribute(elementName, null, null);
 			}
 
-			if (counter == 0) {
-				rootNode = this.doc.createElement(elementName);
-				if (attributeMatches.size() > 0) {
-					String attributeName = attributeMatches.get(2);
-					String attributeValue = attributeMatches.get(3);
-					((Element) parentNode).setAttribute(attributeName, attributeValue);
-				}
-				parentNode = rootNode;
-			}
+			parentNode.appendChild(node);
+			parentNode = node;
 
-			if (counter > 0) {
-				Node node = this.doc.createElement(elementName);
-				if (attributeMatches.size() > 0) {
-					String attributeName = attributeMatches.get(2);
-					String attributeValue = attributeMatches.get(3);
-					((Element) node).setAttribute(attributeName, attributeValue);
-				}
-				parentNode.appendChild(node);
-				parentNode = node;
-			}
-			counter++;
 		}
-		return rootNode;
+		// Return the complete structure (without the placeholder root node)
+		NodeList finalNode = rootNode.getChildNodes();
+		return finalNode;
 	}
 
+	private Node createNodeWithAttribute(String elementName, String attributeName, String attributeValue) {
+		Node node = this.doc.createElement(elementName);
+		if (attributeName != null) {
+			((Element) node).setAttribute(attributeName, attributeValue);
+		}
+		return node;
+	}
+
+	/**
+	 * Returns all matches within all groups as a flat list
+	 * 
+	 * @param stringToSearch
+	 * @param patternString
+	 * @return
+	 */
 	private List<String> findAllRegexMatches(String stringToSearch, String patternString) {
 		Pattern pattern = Pattern.compile(patternString);
 		Matcher matcher = pattern.matcher(stringToSearch);
