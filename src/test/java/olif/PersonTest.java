@@ -17,6 +17,7 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -39,6 +40,7 @@ import org.xml.sax.SAXException;
 class PersonTest {
 
 	MappingEngine mapper;
+	ModelCache modelCache = ModelCache.getInstance();
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -49,7 +51,7 @@ class PersonTest {
 	// @Test
 	void shouldGetSource() throws URISyntaxException {
 		Path path = Paths.get("src", "test", "resources", "persons", "mapping.ttl");
-		Model model = this.mapper.getModelFromFile(path);
+		Model model = this.modelCache.getModel(path);
 
 		String queryString = "PREFIX rml: <http://semweb.mmlab.be/ns/rml#>" + "SELECT ?source WHERE {" + "?mapping rml:logicalSource ?logicalSource."
 				+ "?logicalSource rml:source ?source." + "}";
@@ -65,14 +67,16 @@ class PersonTest {
 		assertEquals("persons.ttl", source);
 	}
 
+	
 	// @Test
 	void shouldGiveTwoMappings() {
 		Path path = Paths.get("src", "test", "resources", "persons", "mapping.ttl");
-		Model model = this.mapper.getModelFromFile(path);
+		Model model = this.modelCache.getModel(path);
 		List<DataMap> mappings = this.mapper.getAllMappingDefinitions(model);
 		assertEquals(2, mappings.size());
 	}
 
+	
 	@Test
 	void shouldMapPersons() throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		Path path = Paths.get("src", "test", "resources", "persons", "mapping.ttl").toAbsolutePath();
@@ -103,6 +107,8 @@ class PersonTest {
 
 	    TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	    Transformer transformer = transformerFactory.newTransformer();
+	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 	    transformer.transform(source, result);
 		
 	    assertEquals(expectedDoc, actualDoc);
