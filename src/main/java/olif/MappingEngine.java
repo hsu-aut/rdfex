@@ -81,48 +81,63 @@ public class MappingEngine {
 			ResultSet resultSet = qexec.execSelect();
 			List<QuerySolution> results = ResultSetFormatter.toList(resultSet);
 
-			// execute XPath to get the container (with placeholders)
-			String containerString = mappingDefinition.getContainer();
-			// fill possible placeholders
-			List<String> containers = this.fillPlaceholders(containerString, results);
 
-			for (String container : containers) {
-				XPath xPath = XPathFactory.newDefaultInstance().newXPath();
-
-				NodeList containerNodes = null;
-				try {
-					containerNodes = (NodeList) xPath.compile(container).evaluate(doc, XPathConstants.NODESET);
-
-					// Create new container nodes if XPath doesn't return any
-					if (containerNodes == null || containerNodes.getLength() == 0) {
-						containerNodes = this.createContainerStructure(container);
-					}
-				} catch (XPathExpressionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				String snippet = mappingDefinition.getSnippet();
-				List<String> completedSnippets = this.fillPlaceholders(snippet, results);
-
-				// Add completed snippets to containers
-				for (int i = 0; i < containerNodes.getLength(); i++) {
-					Node containerNode = containerNodes.item(i);
-					for (String completedSnippet : completedSnippets) {
-						Document tempDoc = docBuilder.parse(new ByteArrayInputStream(completedSnippet.getBytes()));
-						Node snippetNode = doc.importNode(tempDoc.getDocumentElement(), true);
+			for (QuerySolution result : results) {
+				// execute XPath to get the container (with placeholders) and fill possible placeholders
+				String containerTemplate = mappingDefinition.getContainer();
+				String container = this.fillPlaceholder(containerTemplate, result);
+				
+				// Get all possible container nodes
+				List<Node> containerNodes = this.findOrCreateContainer(container);
+				
+				for (Node containerNode : containerNodes) {
+					String snippet = mappingDefinition.getSnippet();
+					String completedSnippet = this.fillPlaceholder(snippet, result);
+					
+					// Add completed snippets to containers
+					// The snippet could be a multiple tags next to each other. This would cause problems (multiple root nodes) when parsing the snippet
+					// The snippet is therefore padded with a temporary super node to mitigate this issues
+					String paddedSnippet = "<tempRoot>" + completedSnippet + "</tempRoot>";
+					Document tempDoc = docBuilder.parse(new ByteArrayInputStream(paddedSnippet.getBytes()));
+					Node paddedSnippetNode = doc.importNode(tempDoc.getDocumentElement(), true);
+					// Add child nodes of the padded snippet (= add the original snippet)
+					NodeList paddedSnippetChildren = paddedSnippetNode.getChildNodes(); 
+					for (int i = 0; i < paddedSnippetNode.getChildNodes().getLength(); i++) {
+						Node snippetNode = paddedSnippetNode.getChildNodes().item(i).cloneNode(true);
 						containerNode.appendChild(snippetNode);
 					}
-					System.out.println("Container:" + container);
-					System.out.println("Adding containerNode: " + containerNode.getNodeName());
-					doc.appendChild(containerNode);
 				}
-			
 			}
-
+			
 		}
 
 		return doc;
+	}
+	
+	
+	private List<Node> findOrCreateContainer(String container) {
+		List<Node> containerNodes = new ArrayList<Node>();
+		XPath xPath = XPathFactory.newDefaultInstance().newXPath();
+		
+		try {
+			// If the container exists, get it via XPath and add it to the list
+			NodeList containerNodeList = (NodeList)xPath.compile(container).evaluate(doc, XPathConstants.NODESET);
+			for (int i = 0; i < containerNodeList.getLength(); i++) {
+				containerNodes.add(containerNodeList.item(i));
+			}
+			
+			// If the container doesn't exist: create new container node, add it to the list and to the document
+			if (containerNodes == null || containerNodes.size() == 0) {
+				Node createdContainerNode = this.createContainerStructure(container);
+				containerNodes.add(createdContainerNode);
+				doc.appendChild(createdContainerNode);
+			}
+		} catch (XPathExpressionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return containerNodes;
 	}
 
 	/**
@@ -153,36 +168,30 @@ public class MappingEngine {
 	}
 
 	/**
-	 * Take a string containing ${?...} placeholders and fill it with sparql results
+	 * Take a string containing ${?...} placeholders and fill it with sparql result
 	 * 
 	 * @param stringWithPlaceholder
-	 * @param sparqlResults
+	 * @param sparqlResult
 	 * @return
 	 */
-	public List<String> fillPlaceholders(String stringWithPlaceholder, List<QuerySolution> sparqlResults) {
+	public String fillPlaceholder(String stringWithPlaceholder, QuerySolution sparqlResult) {
 		// Get all template strings
 		List<String> allMatches = this.findAllRegexMatches(stringWithPlaceholder, "(\\$\\{\\?\\w*\\})");
-		List<String> completedStrings = new ArrayList<String>();
+		String completedString = stringWithPlaceholder;
 		
-		if (allMatches.size() == 0) {
-			// If there are no placeholders, return the input string in a list
-			completedStrings.add(stringWithPlaceholder);
-		} else {
-			// if there are placeholders, replace them with the results
-			for (QuerySolution result : sparqlResults) {
-				String completedString = stringWithPlaceholder;
-				for (String match : allMatches) {
-					String varName = match.substring(3, match.length() - 1);
-					completedString = completedString.replace(match, result.get(varName).toString());
-				}
-				completedStrings.add(completedString);
+		// Only if there are variables, a replacement is necessary. Otherwise just return the input string.
+		if (allMatches.size() > 0) {
+			// if there are placeholders, replace them with values from the result
+			for (String match : allMatches) {
+				String varName = match.substring(3, match.length() - 1);
+				completedString = completedString.replace(match, sparqlResult.get(varName).toString());
 			}
 		}
-		return completedStrings;
+		return completedString;
 	}
 
 
-	private NodeList createContainerStructure(String container) {
+	private Node createContainerStructure(String container) {
 		// First RegEx finds all slash-separated sub-paths of an XPath. These sub-paths might contain attribute conditions (e.g. [@name="asd"])
 		Pattern pattern = Pattern.compile("\\/(\\w-*)+(\\[.+\\])?");
 		Matcher matcher = pattern.matcher(container);
@@ -218,7 +227,7 @@ public class MappingEngine {
 
 		}
 		// Return the complete structure (without the placeholder root node)
-		NodeList finalNode = rootNode.getChildNodes();
+		Node finalNode = rootNode.getFirstChild();
 		return finalNode;
 	}
 
