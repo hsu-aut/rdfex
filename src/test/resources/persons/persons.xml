@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <characters>
-	<character id="person1">
-		<firstname>Ash</firstname>
-		<lastname>Ketchum</lastname>
-		<hair>black</hair>
-	</character>
-	<character id="person2">
-		<firstname>Misty</firstname>
-		<hair>orange</hair>
-	</character>
+  <character id="http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#person2">
+    <firstName>Misty</firstName>
+    <lastName>Mystico</lastName>
+    <hair>orange</hair>
+  </character>
+  <character id="http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#person1">
+    <firstName>Ash</firstName>
+    <lastName>Ketchum</lastName>
+    <hair>black</hair>
+  </character>
 </characters>
