@@ -35,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+import org.xmlunit.assertj.XmlAssert;
 
 
 class PersonTest {
@@ -99,8 +100,6 @@ class PersonTest {
 		DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document expectedDoc = documentBuilder.parse(expectedFile);
 
-		System.out.println(expectedDoc.getChildNodes().item(0).getChildNodes().item(1));
-		
 		DOMSource source = new DOMSource(actualDoc);
 	    FileWriter writer = new FileWriter(new File("C:/Users/Köcher/Desktop/output.xml"));
 	    StreamResult result = new StreamResult(writer);
@@ -111,7 +110,9 @@ class PersonTest {
 	    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 	    transformer.transform(source, result);
 		
-	    assertEquals(expectedDoc, actualDoc);
+	    XmlAssert.assertThat(expectedDoc).and(actualDoc)
+	    	.ignoreWhitespace()
+	    	.areSimilar();
 	}
 
 }
