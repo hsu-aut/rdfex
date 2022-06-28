@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +34,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import olif.DataMap.ContainerVariableCountComparator;
+
 public class MappingEngine {
 
 	// Output XML document
@@ -50,6 +54,10 @@ public class MappingEngine {
 
 		// Get all mapping definitions
 		List<DataMap> mappings = this.getAllMappingDefinitions(mappingModel);
+
+		// Sort mapping definitions so that containers with least amount of variables come first. 
+		// -> This allows to write mappings that build on top of other ones with a deterministic behavior
+		Collections.sort(mappings, new ContainerVariableCountComparator());
 
 		// For each mapping:
 		for (DataMap mappingDefinition : mappings) {
@@ -125,8 +133,13 @@ public class MappingEngine {
 	public List<DataMap> getAllMappingDefinitions(Model model) {
 		String queryString = "PREFIX ol: <http://www.hsu-hh.de/aut/ontologies/olif#>"
 				+ "SELECT ?mappingDefinition ?source ?sourceType ?targetFormat ?queryLanguage ?query ?container ?snippet WHERE {"
-				+ "?mappingDefinition ol:ontologicalSource ?ontologicalSource." + "?ontologicalSource ol:source ?source;" + "ol:sourceType ?sourceType;"
-				+ "ol:queryLanguage ?queryLanguage;" + "ol:query ?query." + "?mappingDefinition ol:container ?container;" + "ol:targetFormat ?targetFormat;"
+				+ "?mappingDefinition ol:ontologicalSource ?ontologicalSource." 
+				+ "?ontologicalSource ol:source ?source;" 
+				+ "ol:sourceType ?sourceType;"
+				+ "ol:queryLanguage ?queryLanguage;" 
+				+ "ol:query ?query." 
+				+ "?mappingDefinition ol:container ?container;" 
+				+ "ol:targetFormat ?targetFormat;"
 				+ "ol:snippet ?snippet." + "}";
 
 		Query mappingQuery = QueryFactory.create(queryString);
@@ -177,7 +190,6 @@ public class MappingEngine {
 		Node rootNode = this.doc.createElement("tempRootElememt");
 		Node parentNode = rootNode;
 		while (matcher.find()) {
-			matcher.group();
 			String elementName = matcher.group().substring(1); // Removes first slash
 			// find complete brackets (\[.+\])?
 			// separate attributes.
