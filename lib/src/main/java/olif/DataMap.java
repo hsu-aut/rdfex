@@ -7,10 +7,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.jena.query.QuerySolution;
-import org.w3c.dom.Node;
 
 /**
- * A class representing DataMap individuals within a mapping document.
+ * A class representing DataMap individuals (i.e. individual mappings) within a mapping document.
  */
 public class DataMap {
 	private String source;
