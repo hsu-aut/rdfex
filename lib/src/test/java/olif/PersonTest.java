@@ -29,7 +29,7 @@ import olif.xml.XmlMappingResult;
 class PersonTest {
 
 	static MappingEngine mappingEngine;
-	static Path mappingPath = Paths.get("src", "test", "resources", "persons", "mapping.ttl");
+	static Path mappingPath = Paths.get("src", "test", "resources", "persons", "mapping.ttl").toAbsolutePath();
 	ModelCache modelCache = ModelCache.getInstance();
 
 	@BeforeAll
