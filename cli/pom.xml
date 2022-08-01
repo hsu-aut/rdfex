@@ -7,11 +7,11 @@
 		<artifactId>parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>olif-cli</artifactId>
 	<name>Olif CLI</name>
 	<description>Olif mapping application built as a CLI</description>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>commons-cli</groupId>
@@ -24,6 +24,7 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -49,7 +50,7 @@
 							<archive>
 								<manifest>
 									<addClasspath>true</addClasspath>
-									<mainClass>cli.Main</mainClass>
+									<mainClass>olif.cli.Main</mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>
@@ -59,6 +60,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>
