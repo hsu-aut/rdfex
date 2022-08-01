@@ -3,13 +3,10 @@ package olif;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -17,74 +14,75 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
+import org.assertj.core.util.Files;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xmlunit.assertj.XmlAssert;
 
+import olif.xml.XmlMappingResult;
 
 class PersonTest {
 
-	MappingEngine mapper;
+	static MappingEngine mappingEngine;
+	static Path mappingPath = Paths.get("src", "test", "resources", "persons", "mapping.ttl");
 	ModelCache modelCache = ModelCache.getInstance();
 
 	@BeforeAll
-	void setUp() throws Exception {
-		this.mapper = new MappingEngine();
+	static void setUp() throws Exception {
+		mappingEngine = new MappingEngine();
 	}
 
-	// Should get the source model correctly
-	// @Test
-	void shouldGetSource() throws URISyntaxException {
-		Path path = Paths.get("src", "test", "resources", "persons", "mapping.ttl");
-		Model model = this.modelCache.getModel(path);
 
-		String queryString = "PREFIX rml: <http://semweb.mmlab.be/ns/rml#>" + "SELECT ?source WHERE {" + "?mapping rml:logicalSource ?logicalSource."
-				+ "?logicalSource rml:source ?source." + "}";
-
-		Query sourceFileQuery = QueryFactory.create(queryString);
-
-		QueryExecution qexec = QueryExecutionFactory.create(sourceFileQuery, model);
-
-		ResultSet results = qexec.execSelect();
-
-		// get the first source result
-		String source = (String) results.nextBinding().get("source").getLiteralValue();
-		assertEquals("persons.ttl", source);
-	}
-
-	
-	// @Test
+	/**
+	 * The person test contains two mapping definitions, these should be found
+	 */
+	@Test
 	void shouldGiveTwoMappings() {
-		Path path = Paths.get("src", "test", "resources", "persons", "mapping.ttl");
-		Model model = this.modelCache.getModel(path);
-		List<DataMap> mappings = this.mapper.getAllMappingDefinitions(model);
+		// Tests whether model cache returns the correct model and whether two mappings are found
+		// TODO: This test could be broken down so that both aspects are tested separately 
+		// (one for modelcache, one for getting right number of mappings
+		Model model = this.modelCache.getModel(mappingPath);
+		List<DataMap> mappings = mappingEngine.getAllMappingDefinitions(model);
+		
 		assertEquals(2, mappings.size());
 	}
 
 	
+	/**
+	 * The persons mapping only has the XML target format, thus there should only be one mapping result
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	@Test
+	void shouldGiveOneMappingResult() throws ParserConfigurationException, SAXException, IOException {
+		// Create the mapped document according to the mapping definition
+		Path outputPath = Files.newTemporaryFile().toPath();
+		List<MappingResult> mappingResults = mappingEngine.map(mappingPath, outputPath);
+		
+		assertEquals(1, mappingResults.size());
+	}
+	
+	
+	/**
+	 * Inspects the mapping result of the persons maping
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
 	@Test
 	void shouldMapPersons() throws ParserConfigurationException, SAXException, IOException {
 		// Create the mapped document according to the mapping definition
-		Path pathToMappingFile = Paths.get("src", "test", "resources", "persons", "mapping.ttl").toAbsolutePath();
-		Document mappedDoc = this.mapper.map(pathToMappingFile);
-
+		Path outputPath = Files.newTemporaryFile().toPath();
+		List<MappingResult> mappingResults = mappingEngine.map(mappingPath, outputPath);
+		MappingResult onlyResult = mappingResults.get(0);
+		Document mappedDoc = ((XmlMappingResult) onlyResult).getDocument();
+		
 		// Load the expected document
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 		InputStream is = classloader.getResourceAsStream("persons/persons.xml");
