@@ -12,13 +12,19 @@ With Olif you can define mapping rules that transform selected parts of your ont
 ## Install
 
 ### Download and run
-🚧 Documentation coming soon 🚧
+The easiest way to use Olif is by running it as a CLI. Download the latest version as a jar and use it like this:
+`java -jar .\olif-cli-0.0.1-SNAPSHOT-jar-with-dependencies.jar -m <path to mapping file> -o <path to output file>`
+
+Make sure to set the two required arguments:
+- `-m`: Path to a file with valid mapping definitions (see https://github.com/hsu-aut/olif#usage)
+- `-o`: Path to an output file. In case this path doesn't yet exist, a file will be created. If it exists, the mapping output will be inserted into this file.
 
 ### As a Maven dependency
 🚧 Documentation coming soon 🚧
 
 ### Compile from source
-🚧 Documentation coming soon 🚧
+Olif is a multi-module Maven project. To compile all the modules, simply clone the whole repository and execute `mvn clean install` from the root of the project.
+You can also build a single module (e.g. cli) -  in order to do that just run the same command in the corresponding module's directory.
 
 ## Usage
 Define mappings using the Olif mapping language in a so-called _mapping model_. We recommend to write a Turtle file, but other RDF serialization formats should work just fine, too. See this example:
