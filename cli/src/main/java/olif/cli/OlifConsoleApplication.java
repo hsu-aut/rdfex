@@ -27,8 +27,8 @@ public class OlifConsoleApplication {
 		
 		if (line.hasOption("mappingPath") && line.hasOption("outputPath")) {
 			System.out.println("Started Mapping...");
-			Path mappingPath = Paths.get(line.getOptionValue("mappingPath"));
-			Path outputPath = Paths.get(line.getOptionValue("outputPath"));
+			Path mappingPath = Paths.get(line.getOptionValue("mappingPath")).normalize().toAbsolutePath();
+			Path outputPath = Paths.get(line.getOptionValue("outputPath")).normalize().toAbsolutePath();
 			System.out.println("MappingFile: " + mappingPath + "\nOutputPath: " + outputPath + "\n");
 			List<MappingResult> mappingResults = mappingEngine.map(mappingPath, outputPath);
 			for (MappingResult mappingResult : mappingResults) {
