@@ -31,7 +31,7 @@ public class ModelCache {
 		return instance;
 	}
 
-	Model getModel(Path modelPath) {
+	public Model getModel(Path modelPath) {
 		Model cachedModel = this.modelCache.get(modelPath);
 
 		// If this model has been loaded before: Get it from the cache

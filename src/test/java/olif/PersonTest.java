@@ -31,6 +31,7 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -43,7 +44,7 @@ class PersonTest {
 	MappingEngine mapper;
 	ModelCache modelCache = ModelCache.getInstance();
 
-	@BeforeEach
+	@BeforeAll
 	void setUp() throws Exception {
 		this.mapper = new MappingEngine();
 	}
@@ -79,38 +80,22 @@ class PersonTest {
 
 	
 	@Test
-	void shouldMapPersons() throws ParserConfigurationException, SAXException, IOException, TransformerException {
-		Path path = Paths.get("src", "test", "resources", "persons", "mapping.ttl").toAbsolutePath();
-		Document actualDoc = this.mapper.map(path);
+	void shouldMapPersons() throws ParserConfigurationException, SAXException, IOException {
+		// Create the mapped document according to the mapping definition
+		Path pathToMappingFile = Paths.get("src", "test", "resources", "persons", "mapping.ttl").toAbsolutePath();
+		Document mappedDoc = this.mapper.map(pathToMappingFile);
 
+		// Load the expected document
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 		InputStream is = classloader.getResourceAsStream("persons/persons.xml");
-
 		File expectedFile = File.createTempFile("temp", null);
-		try (OutputStream outputStream = new FileOutputStream(expectedFile)) {
-			IOUtils.copy(is, outputStream);
-		} catch (FileNotFoundException e) {
-			// handle exception here
-		} catch (IOException e) {
-			// handle exception here
-		}
-
-		// Path expectedXmlPath = Paths.get("src","test","resources", "persons", "persons.xml");
-		//File expectedFile = expectedXmlPath.toFile();
+		OutputStream outputStream = new FileOutputStream(expectedFile);
+		IOUtils.copy(is, outputStream);
 		DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document expectedDoc = documentBuilder.parse(expectedFile);
 
-		DOMSource source = new DOMSource(actualDoc);
-	    FileWriter writer = new FileWriter(new File("C:/Users/Köcher/Desktop/output.xml"));
-	    StreamResult result = new StreamResult(writer);
-
-	    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-	    Transformer transformer = transformerFactory.newTransformer();
-	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-	    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-	    transformer.transform(source, result);
-		
-	    XmlAssert.assertThat(expectedDoc).and(actualDoc)
+		// Compare actual mapped with expected document
+	    XmlAssert.assertThat(expectedDoc).and(mappedDoc)
 	    	.ignoreWhitespace()
 	    	.areSimilar();
 	}
