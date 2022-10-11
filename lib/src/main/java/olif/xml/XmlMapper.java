@@ -24,6 +24,7 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -32,19 +33,22 @@ import org.xml.sax.SAXException;
 
 import olif.DataMap;
 import olif.Mapper;
+import olif.MappingResult;
 
 public class XmlMapper extends Mapper {
 
+	// static so that all instances of XmlMapper use this result
+	protected static XmlMappingResult mappingResult;
 
 	@Override
 	public void map(DataMap mappingDefinition, Path mappingSourcePath, Path outputPath) {
 		// Get source model
 		Model sourceModel = this.modelCache.getModel(mappingSourcePath);
 
-		if (mappingResult == null ) {
+		if (mappingResult == null) {
 			mappingResult = new XmlMappingResult(outputPath);
 		}
-		
+
 		// fire SPARQL query
 		// TODO: Add all prefixes from mapping document into query header
 		String queryString = mappingDefinition.getQuery();
@@ -88,10 +92,6 @@ public class XmlMapper extends Mapper {
 		}
 	}
 
-	
-
-	
-	
 	private Node createContainerStructure(String container) {
 		// First RegEx finds all slash-separated sub-paths of an XPath. These sub-paths might contain attribute conditions (e.g. [@name="asd"])
 		Pattern pattern = Pattern.compile("\\/(\\w-*)+(\\[.+\\])?");
@@ -157,6 +157,10 @@ public class XmlMapper extends Mapper {
 				containerNodes.add(createdContainerNode);
 				mappingResult.getDocument().appendChild(createdContainerNode);
 			}
+		} catch (DOMException e) {
+			System.out.println("A DOMException appeared. This is most likely caused by a container definition resulting in "
+					+ "multiple root elements. Please check your container definitions and make sure that there is only one single root element.");
+			e.printStackTrace();
 		} catch (XPathExpressionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -164,6 +168,10 @@ public class XmlMapper extends Mapper {
 
 		return containerNodes;
 	}
-	
+
+	@Override
+	public MappingResult getResult() {
+		return this.mappingResult;
+	}
 
 }

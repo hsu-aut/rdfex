@@ -8,15 +8,11 @@ import java.util.regex.Pattern;
 
 import org.apache.jena.query.QuerySolution;
 
-import olif.xml.XmlMappingResult;
 
 public abstract class Mapper {
 	
 	// Model cache to store models once they're loaded to get them faster for subsequent uses of the same model
 	protected ModelCache modelCache = ModelCache.getInstance();
-	
-	// Abstract class defining mapping results in a generic way
-	protected static XmlMappingResult mappingResult;
 	
 	/**
 	 * Actual transformation method that converts elements from the source according to a mappingDefinition in order to (later) write them to an output path
@@ -26,6 +22,7 @@ public abstract class Mapper {
 	 */
 	public abstract void map(DataMap mappingDefinition, Path mappingSourcePath, Path outputFilePath);
 	
+	public abstract MappingResult getResult();
 	
 
 	/**
@@ -71,9 +68,6 @@ public abstract class Mapper {
 		return completedString;
 	}
 	
-	public MappingResult getResult() {
-		return mappingResult;
-	}
 	
 	
 	@Override
