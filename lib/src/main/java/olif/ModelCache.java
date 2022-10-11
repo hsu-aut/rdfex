@@ -42,5 +42,9 @@ public class ModelCache {
 		this.modelCache.put(modelPath, model);
 		return model;
 	}
+	
+	public void clear() {
+		this.modelCache.clear();
+	}
 
 }
