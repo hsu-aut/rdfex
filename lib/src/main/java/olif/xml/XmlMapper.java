@@ -39,6 +39,7 @@ public class XmlMapper extends Mapper {
 
 	// static so that all instances of XmlMapper use this result
 	protected static XmlMappingResult mappingResult;
+	XPath xPath = XPathFactory.newDefaultInstance().newXPath();
 
 	@Override
 	public void map(DataMap mappingDefinition, Path mappingSourcePath, Path outputPath) {
@@ -64,9 +65,17 @@ public class XmlMapper extends Mapper {
 			String container = this.fillPlaceholder(containerTemplate, result);
 
 			// Get all possible container nodes
-			List<Node> containerNodes = this.findOrCreateContainer(container);
+			this.findOrCreateContainer(container);
+			NodeList containerNodes = null;
+			try {
+				containerNodes = (NodeList) this.xPath.compile(container).evaluate(mappingResult.getDocument(), XPathConstants.NODESET);
+			} catch (XPathExpressionException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
-			for (Node containerNode : containerNodes) {
+			for (int i = 0; i < containerNodes.getLength(); i++) {
+				Node containerNode = containerNodes.item(i);
 				String snippet = mappingDefinition.getSnippet();
 				String completedSnippet = this.fillPlaceholder(snippet, result);
 
@@ -84,65 +93,16 @@ public class XmlMapper extends Mapper {
 				}
 				Node paddedSnippetNode = mappingResult.getDocument().importNode(tempDoc.getDocumentElement(), true);
 				// Add child nodes of the padded snippet (= add the original snippet)
-				for (int i = 0; i < paddedSnippetNode.getChildNodes().getLength(); i++) {
-					Node snippetNode = paddedSnippetNode.getChildNodes().item(i).cloneNode(true);
+				for (int k = 0; k < paddedSnippetNode.getChildNodes().getLength(); k++) {
+					Node snippetNode = paddedSnippetNode.getChildNodes().item(k).cloneNode(true);
 					containerNode.appendChild(snippetNode);
 				}
 			}
 		}
 	}
-
-	private Node createContainerStructure(String container) {
-		// First RegEx finds all slash-separated sub-paths of an XPath. These sub-paths might contain attribute conditions (e.g. [@name="asd"])
-		Pattern pattern = Pattern.compile("\\/(\\w-*)+(\\[.+\\])?");
-		Matcher matcher = pattern.matcher(container);
-
-		Node rootNode = mappingResult.doc.createElement("tempRootElememt");
-		Node parentNode = rootNode;
-		while (matcher.find()) {
-			String elementName = matcher.group().substring(1); // Removes first slash
-			// find complete brackets (\[.+\])?
-			// separate attributes.
-			// Assumption: Three groups are found
-			// 1: Complete bracket: for example "[@id = asd]"
-			// 2: Attribute only: in the above example: "id"
-			// 3: Value only: in the above example "asd"
-
-			// Second RegEx: Within the current sub-path, find only the atttribute condition (e.g. [@name="asd"])
-			List<String> attributeMatches = this.findAllRegexMatches(elementName, "(\\[@(\\w+)=(.*)\\])");
-
-			// Create a new node. If there are attributes, create a node with attributes
-			Node node;
-			if (attributeMatches.size() > 0) {
-				elementName = elementName.substring(0, elementName.length() - attributeMatches.get(1).length());
-
-				String attributeName = attributeMatches.get(2);
-				String attributeValue = attributeMatches.get(3);
-				node = this.createNodeWithAttribute(elementName, attributeName, attributeValue);
-			} else {
-				node = this.createNodeWithAttribute(elementName, null, null);
-			}
-
-			parentNode.appendChild(node);
-			parentNode = node;
-
-		}
-		// Return the complete structure (without the placeholder root node)
-		Node finalNode = rootNode.getFirstChild();
-		return finalNode;
-	}
-
-	private Node createNodeWithAttribute(String elementName, String attributeName, String attributeValue) {
-		Node node = mappingResult.getDocument().createElement(elementName);
-		if (attributeName != null) {
-			((Element) node).setAttribute(attributeName, attributeValue);
-		}
-		return node;
-	}
-
+	
 	private List<Node> findOrCreateContainer(String container) {
 		List<Node> containerNodes = new ArrayList<Node>();
-		XPath xPath = XPathFactory.newDefaultInstance().newXPath();
 
 		try {
 			// If the container exists, get it via XPath and add it to the list
@@ -168,6 +128,68 @@ public class XmlMapper extends Mapper {
 
 		return containerNodes;
 	}
+
+	private Node createContainerStructure(String container) throws XPathExpressionException {
+		// First RegEx finds all slash-separated sub-paths of an XPath. These sub-paths might contain attribute conditions (e.g. [@name="asd"])
+		Pattern pattern = Pattern.compile("(\\w-*)+(\\[.+\\])?");
+		Matcher matcher = pattern.matcher(container);
+		
+		Node rootNode = mappingResult.doc.createElement("tempRootElememt");
+		Node parentNode = rootNode;
+		while (matcher.find()) {
+			String elementName = matcher.group();
+			if(elementName.startsWith("/")) {
+				elementName = matcher.group().substring(1); // Removes first slash
+			}
+			
+			NodeList existingNodes = (NodeList) this.xPath.compile(elementName).evaluate(mappingResult.getDocument(), XPathConstants.NODESET);
+			Node node;
+			if(existingNodes.getLength() != 0) {
+				node = existingNodes.item(0);
+			} else {
+				// find complete brackets (\[.+\])?
+				// separate attributes.
+				// Assumption: Three groups are found
+				// 1: Complete bracket: for example "[@id='asd']"
+				// 2: Attribute only: in the above example: "id"
+				// 3: Value only: in the above example "'asd'" (with quotes!)
+	
+				// Second RegEx: Within the current sub-path, find only the atttribute condition (e.g. [@name="asd"])
+				List<String> attributeMatches = this.findAllRegexMatches(elementName, "(\\[@(\\w+)=(.*)\\])");
+
+				// Create a new node. If there are attributes, create a node with attributes
+				if (attributeMatches.size() > 0) {
+					elementName = elementName.substring(0, elementName.length() - attributeMatches.get(1).length());
+	
+					String attributeName = attributeMatches.get(2);
+					String attributeValue = attributeMatches.get(3);
+					node = this.createNodeWithAttribute(elementName, attributeName, attributeValue);
+				} else {
+					node = this.createNodeWithAttribute(elementName, null, null);
+				}
+			}
+			parentNode.appendChild(node);
+			parentNode = node;
+
+		}
+		// Return the complete structure (without the placeholder root node)
+		Node finalNode = rootNode.getFirstChild();
+		return finalNode;
+	}
+
+	private Node createNodeWithAttribute(String elementName, String attributeName, String attributeValue) {
+		Node node = mappingResult.getDocument().createElement(elementName);
+		if (attributeName != null) {
+			// Remove quotes from attribute value
+			if(attributeValue.charAt(0) == '\"' || attributeValue.charAt(0) == '\'') {
+				attributeValue = attributeValue.substring(1, attributeValue.length()-1);
+			}
+			((Element) node).setAttribute(attributeName, attributeValue);
+		}
+		return node;
+	}
+
+	
 
 	@Override
 	public MappingResult getResult() {
