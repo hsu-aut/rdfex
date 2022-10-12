@@ -93,7 +93,7 @@ class PersonTest {
 		Document expectedDoc = documentBuilder.parse(expectedFile);
 
 		// Compare actual mapped with expected document
-	    XmlAssert.assertThat(expectedDoc).and(mappedDoc)
+	    XmlAssert.assertThat(mappedDoc).and(expectedDoc)
 	    	.ignoreWhitespace()
 	    	.areSimilar();
 	}
