@@ -35,7 +35,7 @@ public class OlifConsoleApplication {
 				mappingResult.writeResult();
 			}
 		} else {
-			System.out.println("Missing one or more of the parameters -f, -e and -n...");
+			System.out.println("Missing parameters -m and -o...");
 			printHelp();
 		}
 	}

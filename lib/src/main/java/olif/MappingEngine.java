@@ -27,6 +27,7 @@ public class MappingEngine {
 	Set<Mapper> mappers = new HashSet<Mapper>();
 
 	public List<MappingResult> map(Path mappingFilePath, Path outputPath) {
+		this.modelCache.clear();
 		// Create mapping model from the mapping file
 		Model mappingModel = this.modelCache.getModel(mappingFilePath);
 		
