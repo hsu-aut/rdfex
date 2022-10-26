@@ -20,7 +20,7 @@ public abstract class Mapper {
 	 * @param mappingSourcePath
 	 * @param outputFilePath
 	 */
-	public abstract void map(DataMap mappingDefinition, Path mappingSourcePath, Path outputFilePath);
+	public abstract void map(DataMap mappingDefinition, Path outputFilePath);
 	
 	public abstract MappingResult getResult();
 	
