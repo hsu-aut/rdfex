@@ -15,8 +15,7 @@ import olif.MappingEngine;
 import olif.MappingResult;
 
 public class OlifConsoleApplication {
-	MappingEngine mappingEngine = new MappingEngine();
-
+	
 	public void run(String[] args) {
 		CommandLine line = parseArguments(args);
 		
@@ -30,7 +29,9 @@ public class OlifConsoleApplication {
 			Path mappingPath = Paths.get(line.getOptionValue("mappingPath")).normalize().toAbsolutePath();
 			Path outputPath = Paths.get(line.getOptionValue("outputPath")).normalize().toAbsolutePath();
 			System.out.println("MappingFile: " + mappingPath + "\nOutputPath: " + outputPath + "\n");
-			List<MappingResult> mappingResults = mappingEngine.map(mappingPath, outputPath);
+			
+			MappingEngine mappingEngine = new MappingEngine(mappingPath);
+			List<MappingResult> mappingResults = mappingEngine.map(outputPath);
 			for (MappingResult mappingResult : mappingResults) {
 				mappingResult.writeResult();
 			}
