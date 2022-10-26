@@ -1,18 +1,19 @@
 package olif;
 
-import olif.json.JsonMapper;
-import olif.xml.XmlMapper;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
- * A simple factory class that provides a suitable Mapper for a given target format.
+ * A simple factory class that provides a suitable {@link SourceModel} for a given source type.
  */
 public class SourceModelFactory {
 
 	
-	public static SourceModel getModel(String sourceType, String source) {
+	public static SourceModel getModel(String sourceType, String source, Path mappingFileDirectory) {
 		switch (sourceType) {
 		case "http://www.hsu-hh.de/aut/ontologies/olif#File":
-			return new FileModel(source);
+			Path mappingSourcePath = mappingFileDirectory.resolve(Paths.get(source));
+			return new FileModel(mappingSourcePath);
 		case "http://www.hsu-hh.de/aut/ontologies/olif#SparqlEndpoint":
 			return new EndpointModel(source);
 		default:
