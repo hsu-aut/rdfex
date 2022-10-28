@@ -1,0 +1,29 @@
+@prefix p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> .
+@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>
+
+<#PersonMapping> a ol:DataMap;
+	ol:ontologicalSource [
+		ol:source "http://localhost:3330/ds";
+		ol:sourceType ol:SparqlEndpoint;
+		ol:queryLanguage ol:Sparql;
+		ol:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person WHERE {GRAPH ?g { ?person a p:Person} }" 
+	];
+  
+	ol:targetFormat ol:XML;
+	ol:container "/characters";
+	ol:snippet "<character id='${?person}'></character>".
+	
+	
+
+<#PersonAttributeMapping> a ol:DataMap;
+	ol:ontologicalSource [
+		ol:source "http://localhost:3330/ds";
+		ol:sourceType ol:SparqlEndpoint;
+		ol:queryLanguage ol:Sparql;
+		ol:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person ?firstName ?lastName ?hairColor WHERE {GRAPH ?g {?person a p:Person; p:hasFirstName ?firstName; p:hasLastName ?lastName; p:hasHairColor ?hairColor}}" 
+	];
+	
+	ol:targetFormat ol:XML;
+	ol:container "characters/character[@id='${?person}']";
+	ol:snippet "<firstName>${?firstName}</firstName><lastName>${?lastName}</lastName><hair>${?hairColor}</hair>".
+	

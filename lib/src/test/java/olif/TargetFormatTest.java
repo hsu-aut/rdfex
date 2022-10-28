@@ -26,7 +26,7 @@ import org.xmlunit.assertj.XmlAssert;
 
 import olif.xml.XmlMappingResult;
 
-class PersonTest {
+class TargetFormatTest {
 
 	static MappingEngine mappingEngine;
 	static Path mappingPath = Paths.get("src", "test", "resources", "persons", "mapping.ttl").toAbsolutePath();
@@ -34,25 +34,10 @@ class PersonTest {
 
 	@BeforeAll
 	static void setUp() throws Exception {
-		mappingEngine = new MappingEngine();
+		mappingEngine = new MappingEngine(mappingPath);
 	}
 
 
-	/**
-	 * The person test contains two mapping definitions, these should be found
-	 */
-	@Test
-	void shouldGiveTwoMappings() {
-		// Tests whether model cache returns the correct model and whether two mappings are found
-		// TODO: This test could be broken down so that both aspects are tested separately 
-		// (one for modelcache, one for getting right number of mappings
-		Model model = this.modelCache.getModel(mappingPath);
-		List<DataMap> mappings = mappingEngine.getAllMappingDefinitions(model);
-		
-		assertEquals(2, mappings.size());
-	}
-
-	
 	/**
 	 * The persons mapping only has the XML target format, thus there should only be one mapping result
 	 * @throws ParserConfigurationException
@@ -63,7 +48,7 @@ class PersonTest {
 	void shouldGiveOneMappingResult() throws ParserConfigurationException, SAXException, IOException {
 		// Create the mapped document according to the mapping definition
 		Path outputPath = Files.newTemporaryFile().toPath();
-		List<MappingResult> mappingResults = mappingEngine.map(mappingPath, outputPath);
+		List<MappingResult> mappingResults = mappingEngine.map(outputPath);
 		
 		assertEquals(1, mappingResults.size());
 	}
@@ -79,7 +64,7 @@ class PersonTest {
 	void shouldMapPersons() throws ParserConfigurationException, SAXException, IOException {
 		// Create the mapped document according to the mapping definition
 		Path outputPath = Files.newTemporaryFile().toPath();
-		List<MappingResult> mappingResults = mappingEngine.map(mappingPath, outputPath);
+		List<MappingResult> mappingResults = mappingEngine.map(outputPath);
 		MappingResult onlyResult = mappingResults.get(0);
 		Document mappedDoc = ((XmlMappingResult) onlyResult).getDocument();
 		

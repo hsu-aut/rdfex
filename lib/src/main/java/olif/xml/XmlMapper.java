@@ -34,6 +34,7 @@ import org.xml.sax.SAXException;
 import olif.DataMap;
 import olif.Mapper;
 import olif.MappingResult;
+import olif.SourceModel;
 
 public class XmlMapper extends Mapper {
 
@@ -42,9 +43,7 @@ public class XmlMapper extends Mapper {
 	XPath xPath = XPathFactory.newDefaultInstance().newXPath();
 
 	@Override
-	public void map(DataMap mappingDefinition, Path mappingSourcePath, Path outputPath) {
-		// Get source model
-		Model sourceModel = this.modelCache.getModel(mappingSourcePath);
+	public void map(DataMap mappingDefinition, Path outputPath) {
 
 		if (mappingResult == null) {
 			mappingResult = new XmlMappingResult(outputPath);
@@ -52,12 +51,9 @@ public class XmlMapper extends Mapper {
 
 		// fire SPARQL query
 		// TODO: Add all prefixes from mapping document into query header
+		SourceModel sourceModel = mappingDefinition.getSourceModel();
 		String queryString = mappingDefinition.getQuery();
-		Query mappingQuery = QueryFactory.create(queryString);
-		QueryExecution qexec = QueryExecutionFactory.create(mappingQuery, sourceModel);
-
-		ResultSet resultSet = qexec.execSelect();
-		List<QuerySolution> results = ResultSetFormatter.toList(resultSet);
+		List<QuerySolution> results = sourceModel.queryModel(queryString);
 
 		for (QuerySolution result : results) {
 			// execute XPath to get the container (with placeholders) and fill possible placeholders

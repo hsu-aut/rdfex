@@ -9,7 +9,7 @@ import olif.MappingResult;
 public class JsonMapper extends Mapper {
 
 	@Override
-	public void map(DataMap mappingDefinition, Path mappingSourcePath, Path outputFilePath) {
+	public void map(DataMap mappingDefinition, Path outputFilePath) {
 		// TODO Auto-generated method stub
 		
 	}

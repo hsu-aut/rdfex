@@ -133,6 +133,12 @@
 			<artifactId>xmlunit-assertj</artifactId>
 			<version>2.9.0</version>
 		</dependency>
+		<dependency>  
+			<groupId>org.apache.jena</groupId>  
+			<artifactId>jena-fuseki-main</artifactId>  
+			<version>4.5.0</version> 
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>

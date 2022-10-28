@@ -1,5 +1,6 @@
 package olif;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -12,46 +13,46 @@ import org.apache.jena.query.QuerySolution;
  * A class representing DataMap individuals (i.e. individual mappings) within a mapping document.
  */
 public class DataMap {
-	private String source;
-	private String sourceType;
+	private SourceModel sourceModel;
 	private String queryLanguage;
 	private String query;
 	private String targetFormat;
 	private String container;
 	private String snippet;
 	
-	public DataMap(QuerySolution querySolution) {
-		this.source = querySolution.getLiteral("source").toString();
-		this.sourceType = querySolution.getResource("sourceType").toString();
+	public DataMap(QuerySolution querySolution, Path mappingFilePath) {
+		// Get the source model
+		String sourceType = querySolution.getResource("sourceType").toString();
+		String source = querySolution.getLiteral("source").toString();
+		Path mappingFileDirectory = mappingFilePath.getParent();
+		this.sourceModel = SourceModelFactory.getModel(sourceType, source, mappingFileDirectory);	// Directory is needed for file models
+		
 		this.queryLanguage = querySolution.getResource("queryLanguage").toString();
 		this.query = querySolution.getLiteral("query").toString();
 		this.targetFormat = querySolution.getResource("targetFormat").toString();
 		this.container = querySolution.getLiteral("container").toString();
 		this.snippet = querySolution.getLiteral("snippet").toString();
 	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public String getSourceType() {
-		return sourceType;
+	
+	
+	public SourceModel getSourceModel() {
+		return this.sourceModel;
 	}
 
 	public String getQueryLanguage() {
-		return queryLanguage;
+		return this.queryLanguage;
 	}
 
 	public String getQuery() {
-		return query;
+		return this.query;
 	}
 
 	public String getTargetFormat() {
-		return targetFormat;
+		return this.targetFormat;
 	}
 
 	public String getContainer() {
-		return container;
+		return this.container;
 	}
 	
 	public List<String> getContainerVariables() {
@@ -65,7 +66,7 @@ public class DataMap {
 	}
 
 	public String getSnippet() {
-		return snippet;
+		return this.snippet;
 	}
 	
 	public static class ContainerVariableCountComparator implements Comparator<DataMap>

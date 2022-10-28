@@ -1,7 +1,6 @@
 package olif;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,14 +21,25 @@ import olif.DataMap.ContainerVariableCountComparator;
 
 public class MappingEngine {
 
-	// Model cache taking care of loading models
+	// Model cache to take care of loading models
 	ModelCache modelCache = ModelCache.getInstance();
 	Set<Mapper> mappers = new HashSet<Mapper>();
 
-	public List<MappingResult> map(Path mappingFilePath, Path outputPath) {
+	Path mappingFilePath; 
+	
+	public MappingEngine(Path mappingFilePath) {
+		this.mappingFilePath = mappingFilePath;
+	}
+	
+	public List<MappingResult> map(String outputPathString) {
+		Path outputPath = this.mappingFilePath.getParent().resolve(outputPathString);
+		return this.map(outputPath);
+	}
+	
+	public List<MappingResult> map(Path outputPath) {
 		this.modelCache.clear();
 		// Create mapping model from the mapping file
-		Model mappingModel = this.modelCache.getModel(mappingFilePath);
+		Model mappingModel = this.modelCache.getModel(this.mappingFilePath);
 		
 		// Get all mapping definitions
 		List<DataMap> mappings = this.getAllMappingDefinitions(mappingModel);
@@ -44,13 +54,8 @@ public class MappingEngine {
 			String targetFormat = mappingDefinition.getTargetFormat();
 			Mapper mapper = MapperFactory.getMapper(targetFormat);
 			this.mappers.add(mapper);
-			
-			// Get the mapping source path by resolving the relative path to the mapping defintions directory
-			String mappingSource = mappingDefinition.getSource();
-			Path mappingFileDirectory = mappingFilePath.getParent();
-			Path mappingSourcePath = mappingFileDirectory.resolve(Paths.get(mappingSource));
 
-			mapper.map(mappingDefinition, mappingSourcePath, outputPath);
+			mapper.map(mappingDefinition, outputPath);
 			
 		}
 
@@ -88,7 +93,7 @@ public class MappingEngine {
 		ResultSet results = qexec.execSelect();
 		List<QuerySolution> querySolutions = ResultSetFormatter.toList(results);
 
-		List<DataMap> dataMaps = querySolutions.stream().map(qS -> new DataMap(qS)).collect(Collectors.toList());
+		List<DataMap> dataMaps = querySolutions.stream().map(qS -> new DataMap(qS, this.mappingFilePath)).collect(Collectors.toList());
 		return dataMaps;
 	}
 	
