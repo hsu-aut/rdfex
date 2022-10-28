@@ -34,7 +34,7 @@ class MappingDefinitionTest {
 
 	@BeforeAll
 	static void setUp() throws Exception {
-		mappingEngine = new MappingEngine();
+		mappingEngine = new MappingEngine(mappingPath);
 	}
 
 

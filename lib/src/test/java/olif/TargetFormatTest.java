@@ -34,7 +34,7 @@ class TargetFormatTest {
 
 	@BeforeAll
 	static void setUp() throws Exception {
-		mappingEngine = new MappingEngine();
+		mappingEngine = new MappingEngine(mappingPath);
 	}
 
 
@@ -48,7 +48,7 @@ class TargetFormatTest {
 	void shouldGiveOneMappingResult() throws ParserConfigurationException, SAXException, IOException {
 		// Create the mapped document according to the mapping definition
 		Path outputPath = Files.newTemporaryFile().toPath();
-		List<MappingResult> mappingResults = mappingEngine.map(mappingPath, outputPath);
+		List<MappingResult> mappingResults = mappingEngine.map(outputPath);
 		
 		assertEquals(1, mappingResults.size());
 	}
@@ -64,7 +64,7 @@ class TargetFormatTest {
 	void shouldMapPersons() throws ParserConfigurationException, SAXException, IOException {
 		// Create the mapped document according to the mapping definition
 		Path outputPath = Files.newTemporaryFile().toPath();
-		List<MappingResult> mappingResults = mappingEngine.map(mappingPath, outputPath);
+		List<MappingResult> mappingResults = mappingEngine.map(outputPath);
 		MappingResult onlyResult = mappingResults.get(0);
 		Document mappedDoc = ((XmlMappingResult) onlyResult).getDocument();
 		
