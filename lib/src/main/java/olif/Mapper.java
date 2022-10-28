@@ -11,8 +11,6 @@ import org.apache.jena.query.QuerySolution;
 
 public abstract class Mapper {
 	
-	// Model cache to store models once they're loaded to get them faster for subsequent uses of the same model
-	protected ModelCache modelCache = ModelCache.getInstance();
 	
 	/**
 	 * Actual transformation method that converts elements from the source according to a mappingDefinition in order to (later) write them to an output path
