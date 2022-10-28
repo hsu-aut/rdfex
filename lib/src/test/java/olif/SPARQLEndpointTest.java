@@ -39,7 +39,7 @@ class SPARQLEndpointTest {
 	void setUp() throws Exception {
 		Dataset ds = DatasetFactory.createTxnMem() ;
 		Model model = RDFDataMgr.loadModel(modelPath.toString());
-		ds.addNamedModel("http://test.com", model);
+		ds.setDefaultModel(model);
 		server = FusekiServer.create().add("/ds", ds).build() ;
 		server.start() ;
 		System.out.println("Server is running");
