@@ -1,0 +1,26 @@
+[
+	{
+		"id": "1",
+		"name": {
+			"english": "Bulbasaur",
+			"french": "Bulbizarre",
+			"german": "Bisasam"
+		}
+	},
+	{
+		"id": "4",
+		"name": {
+			"english": "Charmander",
+			"french": "Salamèche",
+			"german": "Glumanda"
+		}
+	},
+	{
+		"id": "7",
+		"name": {
+			"english": "Squirtle",
+			"french": "Carapuce",
+			"german": "Schiggy"
+		}
+	}
+]

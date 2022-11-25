@@ -1,0 +1,32 @@
+@prefix poke: <http://www.olif.com/tests/ontologies/pokemon#>.
+@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>.
+
+<#PokemonIdMapping> a ol:DataMap;
+	ol:ontologicalSource [
+		ol:source "pokemon.ttl";
+		ol:sourceType ol:File;
+		ol:queryLanguage ol:Sparql;
+		ol:query '''
+		PREFIX poke: <http://www.olif.com/tests/ontologies/pokemon#>
+		SELECT 
+			?pokemon 
+			(STRAFTER(STR(?pokemon), '#') AS ?id) 
+			(STR(?nameEnLong) AS ?nameEn)
+			(STR(?nameFrLong) AS ?nameFr)
+			(STR(?nameDeLong) AS ?nameDe)
+		WHERE {
+			?pokemon a poke:Pokemon;
+					 poke:Name ?nameEnLong;
+					 poke:Name ?nameFrLong;
+					 poke:Name ?nameDeLong.
+			FILTER(lang(?nameEnLong) = 'en')
+			FILTER(lang(?nameFrLong) = 'fr')
+			FILTER(lang(?nameDeLong) = 'de')
+		}'''
+	];
+  
+	ol:targetFormat ol:JSON;
+	ol:container "$";
+	ol:snippet '{"id":"${?id}", "name": {"english":"${?nameEn}", "french":"${?nameFr}", "german":"${?nameDe}"}}'.
+	
+	

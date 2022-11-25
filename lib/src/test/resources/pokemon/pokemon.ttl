@@ -1,0 +1,178 @@
+@prefix : <http://www.olif.com/tests/ontologies/pokemon#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.olif.com/tests/ontologies/pokemon> .
+
+<http://www.olif.com/tests/ontologies/pokemon> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://www.olif.com/tests/ontologies/pokemon#hasBaseStats
+:hasBaseStats rdf:type owl:ObjectProperty ;
+              rdfs:subPropertyOf :hasStats ;
+              rdfs:range :BaseStats .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#hasStats
+:hasStats rdf:type owl:ObjectProperty ;
+          rdfs:domain :Pokemon ;
+          rdfs:range :Stats .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://www.olif.com/tests/ontologies/pokemon#Attack
+:Attack rdf:type owl:DatatypeProperty ;
+        rdfs:domain :Stats ;
+        rdfs:range xsd:int .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#Defense
+:Defense rdf:type owl:DatatypeProperty ;
+         rdfs:domain :Stats ;
+         rdfs:range xsd:int .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#HP
+:HP rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Stats ;
+    rdfs:range xsd:int .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#Name
+:Name rdf:type owl:DatatypeProperty ;
+      rdfs:domain :Pokemon ;
+      rdfs:range xsd:string .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#SpecialAttack
+:SpecialAttack rdf:type owl:DatatypeProperty ;
+               rdfs:domain :Stats ;
+               rdfs:range xsd:int .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#SpecialDefense
+:SpecialDefense rdf:type owl:DatatypeProperty ;
+                rdfs:domain :Stats ;
+                rdfs:range xsd:int .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#Speed
+:Speed rdf:type owl:DatatypeProperty ;
+       rdfs:domain :Stats ;
+       rdfs:range xsd:int .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://www.olif.com/tests/ontologies/pokemon#BaseStats
+:BaseStats rdf:type owl:Class ;
+           rdfs:subClassOf :Stats .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#FirePokemon
+:FirePokemon rdf:type owl:Class ;
+             rdfs:subClassOf :Pokemon .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#GrassPokemon
+:GrassPokemon rdf:type owl:Class ;
+              rdfs:subClassOf :Pokemon .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#PoisonPokemon
+:PoisonPokemon rdf:type owl:Class ;
+               rdfs:subClassOf :Pokemon .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#Pokemon
+:Pokemon rdf:type owl:Class .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#Stats
+:Stats rdf:type owl:Class .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#WaterPokemon
+:WaterPokemon rdf:type owl:Class ;
+              rdfs:subClassOf :Pokemon .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.olif.com/tests/ontologies/pokemon#1
+<http://www.olif.com/tests/ontologies/pokemon#1> rdf:type owl:NamedIndividual ,
+                                                          :GrassPokemon ,
+                                                          :PoisonPokemon ,
+                                                          :Pokemon ;
+                                                 :hasBaseStats <http://www.olif.com/tests/ontologies/pokemon#1_BaseStats> ;
+                                                 :Name "Bisasam"@de ,
+                                                       "Bulbasaur"@en ,
+                                                       "Bulbizarre"@fr .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#1_BaseStats
+<http://www.olif.com/tests/ontologies/pokemon#1_BaseStats> rdf:type owl:NamedIndividual ,
+                                                                    :BaseStats ;
+                                                           :Attack 49 ;
+                                                           :Defense 49 ;
+                                                           :HP 45 ;
+                                                           :SpecialAttack 65 ;
+                                                           :SpecialDefense 65 ;
+                                                           :Speed 45 .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#4
+<http://www.olif.com/tests/ontologies/pokemon#4> rdf:type owl:NamedIndividual ,
+                                                          :FirePokemon ,
+                                                          :Pokemon ;
+                                                 :hasBaseStats <http://www.olif.com/tests/ontologies/pokemon#4_BaseStats> ;
+                                                 :Name "Charmander"@en ,
+                                                       "Glumanda"@de ,
+                                                       "Salamèche"@fr .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#4_BaseStats
+<http://www.olif.com/tests/ontologies/pokemon#4_BaseStats> rdf:type owl:NamedIndividual ,
+                                                                    :BaseStats ;
+                                                           :Attack 52 ;
+                                                           :Defense 43 ;
+                                                           :HP 39 ;
+                                                           :SpecialAttack 60 ;
+                                                           :SpecialDefense 50 ;
+                                                           :Speed 65 .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#7
+<http://www.olif.com/tests/ontologies/pokemon#7> rdf:type owl:NamedIndividual ,
+                                                          :Pokemon ,
+                                                          :WaterPokemon ;
+                                                 :hasBaseStats <http://www.olif.com/tests/ontologies/pokemon#7_BaseStats> ;
+                                                 :Name "Carapuce"@fr ,
+                                                       "Schiggy"@de ,
+                                                       "Squirtle"@en .
+
+
+###  http://www.olif.com/tests/ontologies/pokemon#7_BaseStats
+<http://www.olif.com/tests/ontologies/pokemon#7_BaseStats> rdf:type owl:NamedIndividual ,
+                                                                    :BaseStats ;
+                                                           :Attack 48 ;
+                                                           :Defense 65 ;
+                                                           :HP 44 ;
+                                                           :SpecialAttack 50 ;
+                                                           :SpecialDefense 64 ;
+                                                           :Speed 43 .
+
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
