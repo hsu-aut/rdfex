@@ -31,7 +31,7 @@ public class DataMap {
 		this.query = querySolution.getLiteral("query").toString();
 		this.targetFormat = querySolution.getResource("targetFormat").toString();
 		this.container = querySolution.getLiteral("container").toString();
-		this.snippet = querySolution.getLiteral("snippet").toString();
+		this.snippet = querySolution.getLiteral("snippet").getString();
 	}
 	
 	
