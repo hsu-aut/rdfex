@@ -1,18 +1,13 @@
 package olif.json;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.jena.query.QuerySolution;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
@@ -42,23 +37,6 @@ public class JsonMapper extends Mapper {
 			}
 		}
 
-		// Solution
-		
-/**		JsonPathReader pathReader2 = new JsonPathReader();
-//		JsonElement testElem = pathReader2.read(mappingResult.json, "$");
-//		String elemBefore = testElem.toString();
-//		
-//		testElem.getAsJsonArray().add("test");
-//		
-//		String jsonString = mappingResult.json.toString();
-//		String replacedString = jsonString.replace(elemBefore.toString(), testElem.toString());
-//		
-//		mappingResult.json = JsonParser.parseString(replacedString);
-//		JsonElement testElem2 = pathReader2.read(mappingResult.json, "$");
-//		System.out.println("done");
-**/	
-		
-		
 		// fire SPARQL query
 		// TODO: Add all prefixes from mapping document into query header
 		SourceModel sourceModel = mappingDefinition.getSourceModel();
@@ -79,6 +57,7 @@ public class JsonMapper extends Mapper {
 			
 			String snippet = mappingDefinition.getSnippet();
 			String completedSnippet = this.fillPlaceholder(snippet, result);
+			
 			Gson gson = new Gson();
 			JsonObject snippetElement = gson.fromJson(completedSnippet, JsonObject.class);
 //			mappingResult.addToElement(containerElements, snippetElement);
@@ -157,6 +136,10 @@ public class JsonMapper extends Mapper {
 	@Override
 	public MappingResult getResult() {
 		return mappingResult;
+	}
+	
+	protected void clearResult() {
+		mappingResult = null;
 	}
 
 }
