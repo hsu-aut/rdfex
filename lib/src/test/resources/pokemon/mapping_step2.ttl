@@ -1,0 +1,45 @@
+@prefix poke: <http://www.olif.com/tests/ontologies/pokemon#>.
+@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>.
+
+<#PokemonIdMapping> a ol:DataMap;
+	ol:ontologicalSource [
+		ol:source "pokemon.ttl";
+		ol:sourceType ol:File;
+		ol:queryLanguage ol:Sparql;
+		ol:query '''
+		PREFIX poke: <http://www.olif.com/tests/ontologies/pokemon#>
+		PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+		SELECT ?pokemon (STRAFTER(STR(?pokemon), '#') AS ?idString) (xsd:integer (?idString) AS ?id) ?typeName ?attack ?defense ?hp ?specialAttack ?specialDefense ?speed
+		WHERE {
+			?pokemon a ?type;
+				poke:hasBaseStats ?baseStats.
+			?type rdfs:subClassOf poke:Pokemon.
+			BIND( (STRAFTER(STR(?type), '#')) AS ?typeCorrected)
+			BIND( (STRBEFORE(STR(?typeCorrected), 'Pokemon')) AS ?typeName)
+			?baseStats poke:Speed ?speed;
+               poke:Attack ?attack;
+               poke:Defense ?defense;
+               poke:HP ?hp;
+               poke:SpecialAttack ?specialAttack;
+               poke:SpecialDefense ?specialDefense.
+		}'''
+	];
+  
+	ol:targetFormat ol:JSON;
+	ol:container "$.[?(@.id==${?id})]";
+	ol:snippet '''
+			{"type": [
+				"${?typeName}"
+			],
+			"base": {
+				"HP": ${?hp},
+				"Attack": ${?attack},
+				"Defense": ${?defense},
+				"Sp. Attack": ${?specialAttack},
+				"Sp. Defense": ${?specialDefense},
+				"Speed": ${?speed}
+			}
+		}'''.
+	
+	

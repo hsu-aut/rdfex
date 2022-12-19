@@ -7,10 +7,12 @@
 		ol:sourceType ol:File;
 		ol:queryLanguage ol:Sparql;
 		ol:query '''
+		PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 		PREFIX poke: <http://www.olif.com/tests/ontologies/pokemon#>
 		SELECT 
 			?pokemon 
-			(STRAFTER(STR(?pokemon), '#') AS ?id) 
+			(STRAFTER(STR(?pokemon), '#') AS ?idString)
+			(xsd:integer (?idString) AS ?id) 
 			(STR(?nameEnLong) AS ?nameEn)
 			(STR(?nameFrLong) AS ?nameFr)
 			(STR(?nameDeLong) AS ?nameDe)
@@ -27,6 +29,6 @@
   
 	ol:targetFormat ol:JSON;
 	ol:container "$";
-	ol:snippet '{"id":"${?id}", "name": {"english":"${?nameEn}", "french":"${?nameFr}", "german":"${?nameDe}"}}'.
+	ol:snippet '{"id":${?id}, "name": {"english":"${?nameEn}", "french":"${?nameFr}", "german":"${?nameDe}"}}'.
 	
 	
