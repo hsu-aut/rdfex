@@ -9,8 +9,9 @@ import com.google.gson.JsonElement;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.spi.json.GsonJsonProvider;
-import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
+import com.jayway.jsonpath.TypeRef;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 
 public class JsonPathReader {
 
@@ -18,22 +19,26 @@ public class JsonPathReader {
 	Gson gson = new Gson();
 	
 	public JsonPathReader() {
+		// Note that Gson can not be used as the JsonProvider and MappingProvider as it adds trailing ".0" to integers
+		// Maybe this can be changed by passing a pre-configured Gson object to GsonJsonProdiver?
 		this.config = new Configuration.ConfigurationBuilder()
-				.jsonProvider(new GsonJsonProvider())
+				.jsonProvider(new JacksonJsonProvider())
 				.options(Option.ALWAYS_RETURN_LIST)
-				.mappingProvider(new GsonMappingProvider())
+				.mappingProvider(new JacksonMappingProvider())
 				.build();
 	}
 	
 	
 	List<JsonElement> read(JsonElement json, String pathToRead) {
+		TypeRef<List<Object>> typeRef = new TypeRef<List<Object>>() {};
 		List<Object> preResults = JsonPath
                 .using(this.config)
-                .parse(json)
-                .read(pathToRead, List.class);
+                .parse(json.toString())
+                .read(pathToRead, typeRef);
 		
 		List<JsonElement> results = preResults.stream().map(res -> gson.toJsonTree(res)).collect(Collectors.toList());
 		
 		return results;
 	}
+	
 }
