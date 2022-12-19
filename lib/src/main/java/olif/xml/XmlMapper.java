@@ -182,7 +182,11 @@ public class XmlMapper extends Mapper {
 
 	@Override
 	public MappingResult getResult() {
-		return this.mappingResult;
+		return mappingResult;
+	}
+	
+	protected void clearResult() {
+		mappingResult = null;
 	}
 
 }

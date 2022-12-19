@@ -22,6 +22,8 @@ public abstract class Mapper {
 	
 	public abstract MappingResult getResult();
 	
+	protected abstract void clearResult();
+	
 
 	/**
 	 * Returns all matches within all groups as a flat list
@@ -60,7 +62,7 @@ public abstract class Mapper {
 			// if there are placeholders, replace them with values from the result
 			for (String match : allMatches) {
 				String varName = match.substring(3, match.length() - 1);
-				completedString = completedString.replace(match, sparqlResult.get(varName).toString());
+				completedString = completedString.replace(match, sparqlResult.get(varName).asLiteral().getLexicalForm());
 			}
 		}
 		return completedString;
