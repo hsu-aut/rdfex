@@ -1,6 +1,6 @@
 [
 	{
-		"id": "1",
+		"id": 1,
 		"name": {
 			"english": "Bulbasaur",
 			"french": "Bulbizarre",
@@ -8,7 +8,7 @@
 		}
 	},
 	{
-		"id": "4",
+		"id": 4,
 		"name": {
 			"english": "Charmander",
 			"french": "Salamèche",
@@ -16,7 +16,7 @@
 		}
 	},
 	{
-		"id": "7",
+		"id": 7,
 		"name": {
 			"english": "Squirtle",
 			"french": "Carapuce",
