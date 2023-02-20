@@ -95,7 +95,7 @@ public class JsonTest {
 		System.out.println(expectedResult.toString());
 		System.out.println(actualResult.toString());
 		// Compare actual mapped with expected document
-		JSONAssert.assertEquals(actualResult.toString(), expectedResult.toString(), false);
+		JSONAssert.assertEquals(expectedResult.toString(), actualResult.toString(), false);
 	}
 
 
