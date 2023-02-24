@@ -6,11 +6,11 @@
 	<parent>
 		<groupId>de.hsu-hh.aut.olif</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.0.2</version>
+		<version>0.0.3</version>
 	</parent>
 
 	<artifactId>olif-lib</artifactId>
-	<name>Olif</name>
+	<name>Olif Lib</name>
 	<description>Olif Library to be integrated into Java projects</description>
 
 	<build>
