@@ -16,7 +16,7 @@ public class MapperFactory {
 		case "http://www.hsu-hh.de/aut/ontologies/olif#XML":
 			return new XmlMapper();
 		default:
-			throw new Error("The invalid targetFormat "+ targetFormat + " has been given. Please select a valid target format, i.e. one of the individuals of the class DataInterchangeFormat.");
+			throw new Error("The invalid targetFormat "+ targetFormat + " has been given. Please select a valid target format, i.e. one of the individuals of the class DataExchangeFormat.");
 		}
 	}
 }

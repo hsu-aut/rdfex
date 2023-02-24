@@ -16,14 +16,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetFormatter;
-import org.apache.jena.rdf.model.Model;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -127,13 +120,14 @@ public class XmlMapper extends Mapper {
 
 	private Node createContainerStructure(String container) throws XPathExpressionException {
 		// First RegEx finds all slash-separated sub-paths of an XPath. These sub-paths might contain attribute conditions (e.g. [@name="asd"])
-		Pattern pattern = Pattern.compile("(\\w-*)+(\\[.+\\])?");
+		Pattern pattern = Pattern.compile("/([\\w\\-]*)(?:\\[.*?\\])?");
 		Matcher matcher = pattern.matcher(container);
 		
 		Node rootNode = mappingResult.doc.createElement("tempRootElememt");
 		Node parentNode = rootNode;
 		while (matcher.find()) {
-			String elementName = matcher.group();
+			String pathSection = matcher.group();	// Default group is a complete match, i.e. a slash-separated element of a path
+			String elementName = matcher.group(1);	// Group 1 is just the node name (without attribute filters)
 			if(elementName.startsWith("/")) {
 				elementName = matcher.group().substring(1); // Removes first slash
 			}
@@ -151,12 +145,10 @@ public class XmlMapper extends Mapper {
 				// 3: Value only: in the above example "'asd'" (with quotes!)
 	
 				// Second RegEx: Within the current sub-path, find only the atttribute condition (e.g. [@name="asd"])
-				List<String> attributeMatches = this.findAllRegexMatches(elementName, "(\\[@(\\w+)=(.*)\\])");
+				List<String> attributeMatches = this.findAllRegexMatches(pathSection, "(\\[@(\\w+)=(.*)\\])");
 
 				// Create a new node. If there are attributes, create a node with attributes
 				if (attributeMatches.size() > 0) {
-					elementName = elementName.substring(0, elementName.length() - attributeMatches.get(1).length());
-	
 					String attributeName = attributeMatches.get(2);
 					String attributeValue = attributeMatches.get(3);
 					node = this.createNodeWithAttribute(elementName, attributeName, attributeValue);
@@ -189,7 +181,11 @@ public class XmlMapper extends Mapper {
 
 	@Override
 	public MappingResult getResult() {
-		return this.mappingResult;
+		return mappingResult;
+	}
+	
+	protected void clearResult() {
+		mappingResult = null;
 	}
 
 }

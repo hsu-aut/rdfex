@@ -1,0 +1,60 @@
+[
+	{
+		"id": 1,
+		"name": {
+			"english": "Bulbasaur",
+			"french": "Bulbizarre",
+			"german": "Bisasam"
+		},
+		"type": [
+			"Grass",
+			"Poison"
+		],
+		"base": {
+			"HP": 45,
+			"Attack": 49,
+			"Defense": 49,
+			"Sp. Attack": 65,
+			"Sp. Defense": 65,
+			"Speed": 45
+		}
+	},
+	{
+		"id": 4,
+		"name": {
+			"english": "Charmander",
+			"french": "Salamèche",
+			"german": "Glumanda"
+		},
+		"type": [
+			"Fire"
+		],
+		"base": {
+			"HP": 39,
+			"Attack": 52,
+			"Defense": 43,
+			"Sp. Attack": 60,
+			"Sp. Defense": 50,
+			"Speed": 65
+		}
+	},
+	{
+		"id": 7,
+		"name": {
+			"english": "Squirtle",
+			"french": "Carapuce",
+			"german": "Schiggy"
+		},
+		"type": [
+			"Water"
+		],
+		"base": {
+			"HP": 44,
+			"Attack": 48,
+			"Defense": 65,
+			"Sp. Attack": 50,
+			"Sp. Defense": 64,
+			"Speed": 43
+		}
+	}
+]

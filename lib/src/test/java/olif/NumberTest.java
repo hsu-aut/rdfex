@@ -1,6 +1,6 @@
 package olif;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,20 +16,21 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.jena.rdf.model.Model;
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xmlunit.assertj.XmlAssert;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.ElementSelectors;
 
 import olif.xml.XmlMappingResult;
 
-class TargetFormatTest {
+public class NumberTest {
 
 	static MappingEngine mappingEngine;
-	static Path mappingPath = Paths.get("src", "test", "resources", "xml", "mapping.ttl").toAbsolutePath();
+	static Path mappingPath = Paths.get("src", "test", "resources", "xml", "regex-testing", "mapping.ttl").toAbsolutePath();
 	ModelCache modelCache = ModelCache.getInstance();
 
 	@BeforeAll
@@ -38,30 +39,8 @@ class TargetFormatTest {
 	}
 
 
-	/**
-	 * The persons mapping only has the XML target format, thus there should only be one mapping result
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
-	 */
 	@Test
-	void shouldGiveOneMappingResult() throws ParserConfigurationException, SAXException, IOException {
-		// Create the mapped document according to the mapping definition
-		Path outputPath = Files.newTemporaryFile().toPath();
-		List<MappingResult> mappingResults = mappingEngine.map(outputPath);
-		
-		assertEquals(1, mappingResults.size());
-	}
-	
-	
-	/**
-	 * Inspects the mapping result of the persons maping
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
-	 */
-	@Test
-	void shouldMapPersons() throws ParserConfigurationException, SAXException, IOException {
+	void shouldMapNumbers() throws ParserConfigurationException, SAXException, IOException {
 		// Create the mapped document according to the mapping definition
 		Path outputPath = Files.newTemporaryFile().toPath();
 		List<MappingResult> mappingResults = mappingEngine.map(outputPath);
@@ -70,18 +49,21 @@ class TargetFormatTest {
 		
 		// Load the expected document
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classloader.getResourceAsStream("xml/persons.xml");
+		InputStream is = classloader.getResourceAsStream("xml/regex-testing/numbers.xml");
 		File expectedFile = File.createTempFile("temp", null);
 		OutputStream outputStream = new FileOutputStream(expectedFile);
 		IOUtils.copy(is, outputStream);
 		DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document expectedDoc = documentBuilder.parse(expectedFile);
-
+				
 		// Compare actual mapped with expected document
 	    XmlAssert.assertThat(mappedDoc).and(expectedDoc)
 	    	.ignoreWhitespace()
-//	    	.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.))
+	    	.normalizeWhitespace()
+	    	.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
 	    	.areSimilar();
 	}
+	
 
 }
+	

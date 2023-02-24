@@ -63,6 +63,7 @@ public class MappingEngine {
 		List<MappingResult> mappingResults = new ArrayList<MappingResult>();
 		for (Mapper mapper : this.mappers) {
 			mappingResults.add(mapper.getResult());
+			mapper.clearResult();
 		}
 		return mappingResults;
 	}
