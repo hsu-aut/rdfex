@@ -31,8 +31,8 @@ import olif.xml.XmlMappingResult;
 
 class SPARQLEndpointTest {
 	
-	static Path mappingPath = Paths.get("src", "test", "resources", "persons", "mapping_Endpoint.ttl").toAbsolutePath();
-	static Path modelPath = Paths.get("src", "test", "resources", "persons", "persons.ttl").toAbsolutePath();
+	static Path mappingPath = Paths.get("src", "test", "resources", "xml", "mapping_Endpoint.ttl").toAbsolutePath();
+	static Path modelPath = Paths.get("src", "test", "resources", "xml", "persons.ttl").toAbsolutePath();
 	static FusekiServer server;
 
 	@BeforeEach
@@ -56,7 +56,7 @@ class SPARQLEndpointTest {
 
 		// Load the expected document
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classloader.getResourceAsStream("persons/persons.xml");
+		InputStream is = classloader.getResourceAsStream("xml/persons.xml");
 		File expectedFile = File.createTempFile("temp", null);
 		OutputStream outputStream = new FileOutputStream(expectedFile);
 		IOUtils.copy(is, outputStream);

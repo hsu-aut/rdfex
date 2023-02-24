@@ -37,8 +37,8 @@ public class JsonTest {
 	 */
 	@Test
 	void shouldGiveOneMappingResult() throws ParserConfigurationException, SAXException, IOException {
-		Path outputPath = Paths.get("src", "test", "resources", "pokemon", "pokemon_empty.json").toAbsolutePath();
-		Path mappingPath_step1 = Paths.get("src", "test", "resources", "pokemon", "mapping_step1.ttl").toAbsolutePath();
+		Path outputPath = Paths.get("src", "test", "resources", "json", "pokemon_empty.json").toAbsolutePath();
+		Path mappingPath_step1 = Paths.get("src", "test", "resources", "json", "mapping_step1.ttl").toAbsolutePath();
 		mappingEngine = new MappingEngine(mappingPath_step1);
 		// Create the mapped document according to the mapping definition
 		List<MappingResult> mappingResults = mappingEngine.map(outputPath);
@@ -55,9 +55,9 @@ public class JsonTest {
 	 */
 	@Test
 	void shouldMapFirstStep() throws ParserConfigurationException, SAXException, IOException, JSONException {
-		Path outputPath = Paths.get("src", "test", "resources", "pokemon", "pokemon_empty.json").toAbsolutePath();
-		Path mappingPath_step1 = Paths.get("src", "test", "resources", "pokemon", "mapping_step1.ttl").toAbsolutePath();
-		Path expectedResultPath_Step1 = Paths.get("src", "test", "resources", "pokemon", "pokemon_step1.json").toAbsolutePath();
+		Path outputPath = Paths.get("src", "test", "resources", "json", "pokemon_empty.json").toAbsolutePath();
+		Path mappingPath_step1 = Paths.get("src", "test", "resources", "json", "mapping_step1.ttl").toAbsolutePath();
+		Path expectedResultPath_Step1 = Paths.get("src", "test", "resources", "json", "pokemon_step1.json").toAbsolutePath();
 		
 		mappingEngine = new MappingEngine(mappingPath_step1);
 		// Create the mapped document according to the mapping definition
@@ -80,9 +80,9 @@ public class JsonTest {
 	 */
 	@Test
 	void shouldMapSecondStep() throws ParserConfigurationException, SAXException, IOException, JSONException {
-		Path outputPath = Paths.get("src", "test", "resources", "pokemon", "pokemon_step1.json").toAbsolutePath();
-		Path mappingPath_step2 = Paths.get("src", "test", "resources", "pokemon", "mapping_step2.ttl").toAbsolutePath();
-		Path expectedResultPath_Step2 = Paths.get("src", "test", "resources", "pokemon", "pokemon_step2.json").toAbsolutePath();
+		Path outputPath = Paths.get("src", "test", "resources", "json", "pokemon_step1.json").toAbsolutePath();
+		Path mappingPath_step2 = Paths.get("src", "test", "resources", "json", "mapping_step2.ttl").toAbsolutePath();
+		Path expectedResultPath_Step2 = Paths.get("src", "test", "resources", "json", "pokemon_step2.json").toAbsolutePath();
 		
 		mappingEngine = new MappingEngine(mappingPath_step2);
 		// Create the mapped document according to the mapping definition

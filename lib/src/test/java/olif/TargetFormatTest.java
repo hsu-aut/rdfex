@@ -29,7 +29,7 @@ import olif.xml.XmlMappingResult;
 class TargetFormatTest {
 
 	static MappingEngine mappingEngine;
-	static Path mappingPath = Paths.get("src", "test", "resources", "persons", "mapping.ttl").toAbsolutePath();
+	static Path mappingPath = Paths.get("src", "test", "resources", "xml", "mapping.ttl").toAbsolutePath();
 	ModelCache modelCache = ModelCache.getInstance();
 
 	@BeforeAll
@@ -70,7 +70,7 @@ class TargetFormatTest {
 		
 		// Load the expected document
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classloader.getResourceAsStream("persons/persons.xml");
+		InputStream is = classloader.getResourceAsStream("xml/persons.xml");
 		File expectedFile = File.createTempFile("temp", null);
 		OutputStream outputStream = new FileOutputStream(expectedFile);
 		IOUtils.copy(is, outputStream);
@@ -80,6 +80,7 @@ class TargetFormatTest {
 		// Compare actual mapped with expected document
 	    XmlAssert.assertThat(mappedDoc).and(expectedDoc)
 	    	.ignoreWhitespace()
+//	    	.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.))
 	    	.areSimilar();
 	}
 
