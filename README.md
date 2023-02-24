@@ -3,7 +3,7 @@
 # Olif - Ontology mapping language for data interchange formats
 <br><br>
 
-Olif is a generic mapping language to define custom mappings that transform RDF data into data interchange formats such as XML or JSON. Based on the ideas of [RML](https://rml.io/).
+Olif is a generic mapping language to define custom mappings that transform RDF data into data exchange formats such as XML or JSON. Based on the ideas of [RML](https://rml.io/).
 
 ## About
 You took time and efforts and created a semantic model for all your information which may be contained in heterogeneous data sources. But then you need to use some slice of those information and import it into a legacy tool. Of course this legacy tool only supports XML or JSON imports. How do you get the relevant parts of your semantic model in the form that your legacy tool accepts? 
