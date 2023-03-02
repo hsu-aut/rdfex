@@ -59,8 +59,7 @@ public class JsonMapper extends Mapper {
 			String completedSnippet = this.fillPlaceholder(snippet, result);
 			
 			Gson gson = new Gson();
-			JsonObject snippetElement = gson.fromJson(completedSnippet, JsonObject.class);
-//			mappingResult.addToElement(containerElements, snippetElement);
+			JsonElement snippetElement = gson.fromJson(completedSnippet, JsonElement.class);
 			for (JsonElement containerElement : containerElements) {
 				
 				String containerBeforeChange = containerElement.toString();
