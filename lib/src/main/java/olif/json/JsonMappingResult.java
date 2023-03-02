@@ -37,7 +37,12 @@ public class JsonMappingResult extends MappingResult {
 	void addToElement(JsonElement existingElement, JsonElement elementToAdd) {
 		// Primitive can only be added to array
 		if (elementToAdd.isJsonPrimitive()) {
-			existingElement.getAsJsonArray().add(elementToAdd);
+			if(existingElement.isJsonArray()) {
+				existingElement.getAsJsonArray().add(elementToAdd);
+			}
+			if(existingElement.isJsonPrimitive()) {
+				existingElement = elementToAdd;
+			}
 			return;
 		}
 
