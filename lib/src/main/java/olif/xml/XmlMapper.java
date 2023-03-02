@@ -67,7 +67,8 @@ public class XmlMapper extends Mapper {
 				Node containerNode = containerNodes.item(i);
 				String snippet = mappingDefinition.getSnippet();
 				String completedSnippet = this.fillPlaceholder(snippet, result);
-
+				completedSnippet = completedSnippet.stripLeading();		// Makes for a bit nicer XML output
+				
 				// Add completed snippets to containers
 				// The snippet could be a multiple tags next to each other. This would cause problems (multiple root nodes) when parsing the snippet into an empty
 				// temp doc. The snippet is therefore padded with a temporary super node to mitigate this issues
