@@ -2,7 +2,7 @@
 
 <#MfgDateMapping> a ol:DataMap;
   ol:ontologicalSource [
-    ol:source "robotConfiguration.ttl";
+    ol:source "robotConfig_ABC.ttl";
     ol:sourceType ol:File;
     ol:queryLanguage ol:Sparql;
     ol:query '''
@@ -18,7 +18,7 @@
   
 <#SerialNoMapping> a ol:DataMap;
   ol:ontologicalSource [
-    ol:source "robotConfiguration.ttl";
+    ol:source "robotConfig_ABC.ttl";
     ol:sourceType ol:File;
     ol:queryLanguage ol:Sparql;
     ol:query '''
