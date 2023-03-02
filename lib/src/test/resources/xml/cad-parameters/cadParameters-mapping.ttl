@@ -1,0 +1,24 @@
+@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>.
+
+<#ParameterMapping> a ol:DataMap;
+  ol:ontologicalSource [
+    ol:source "robotConfig_ABC.ttl";
+    ol:sourceType ol:File;
+    ol:queryLanguage ol:Sparql;
+    ol:query '''
+      PREFIX ex: <http://www.example.org/robots#>
+      SELECT ?parameterName ?parameterValue WHERE {
+        ex:Robot_ABC ex:hasParameter ?parameter.
+        ?parameter ex:hasName ?parameterName;
+          ex:hasValue ?parameterValue.
+      } ORDER BY ?parameterName'''	# Just for XML comparison 
+  ];
+  ol:targetFormat ol:XML;
+  ol:container "/ParamWithValueList/parameters";
+  ol:snippet '''
+	<ParamWithValue>
+      <name>length_${?parameterName}</name>
+      <typeCode>mm</typeCode>
+      <value>${?parameterValue} mm</value>
+    </ParamWithValue>
+	'''.

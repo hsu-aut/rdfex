@@ -1,0 +1,24 @@
+@prefix ex: <http://www.example.org/robots#> .
+
+ex:123Corp a ex:Customer.
+ex:Project_2905617 a ex:Project;
+	ex:hasCustomer ex:123Corp;
+	ex:hasSolution ex:Robot_ABC.
+
+ex:Robot_ABC ex:hasMfgDate "2023-03-03";
+	ex:hasSerialNo "ABC123";
+	ex:hasParameter ex:Parameter1,
+					ex:Parameter2,
+					ex:Parameter3.
+
+ex:Parameter1 a ex:Parameter;
+	ex:hasName "arm1";
+	ex:hasValue 780.
+	
+ex:Parameter2 a ex:Parameter;
+	ex:hasName "arm2";
+	ex:hasValue 655.
+	
+ex:Parameter3 a ex:Parameter;
+	ex:hasName "arm3";
+	ex:hasValue 135.
