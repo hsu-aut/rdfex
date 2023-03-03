@@ -1,32 +1,32 @@
-@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>.
+@prefix rdfex: <http://www.w3id.org/hsu-aut/rdfex#>.
 
-<#MfgDateMapping> a ol:DataMap;
-  ol:ontologicalSource [
-    ol:source "robotConfig_ABC.ttl";
-    ol:sourceType ol:File;
-    ol:queryLanguage ol:Sparql;
-    ol:query '''
+<#MfgDateMapping> a rdfex:DataMap;
+  rdfex:ontologicalSource [
+    rdfex:source "robotConfig_ABC.ttl";
+    rdfex:sourceType rdfex:File;
+    rdfex:queryLanguage rdfex:Sparql;
+    rdfex:query '''
       PREFIX ex: <http://www.example.org/robots#> 
       SELECT ?mfgDate WHERE {
         ex:Robot_ABC ex:hasMfgDate ?mfgDate.
       }'''
   ];
-  ol:targetFormat ol:JSON;
-  ol:container "$.submodels[?(@.idShort=='Nameplate')].submodelElements[?(@.idShort=='DateOfManufacture')]";
-  ol:snippet '{"value": "${?mfgDate}"}'.
+  rdfex:targetFormat rdfex:JSON;
+  rdfex:container "$.submodels[?(@.idShort=='Nameplate')].submodelElements[?(@.idShort=='DateOfManufacture')]";
+  rdfex:snippet '{"value": "${?mfgDate}"}'.
   
   
-<#SerialNoMapping> a ol:DataMap;
-  ol:ontologicalSource [
-    ol:source "robotConfig_ABC.ttl";
-    ol:sourceType ol:File;
-    ol:queryLanguage ol:Sparql;
-    ol:query '''
+<#SerialNoMapping> a rdfex:DataMap;
+  rdfex:ontologicalSource [
+    rdfex:source "robotConfig_ABC.ttl";
+    rdfex:sourceType rdfex:File;
+    rdfex:queryLanguage rdfex:Sparql;
+    rdfex:query '''
       PREFIX ex: <http://www.example.org/robots#> 
       SELECT ?serialNo WHERE {
         ex:Robot_ABC ex:hasSerialNo ?serialNo.
       }'''
   ];
-  ol:targetFormat ol:JSON;
-  ol:container "$.submodels[?(@.idShort=='Nameplate')].submodelElements[?(@.idShort=='SerialNumber')]";
-  ol:snippet '{"value": "${?serialNo}"}'.
+  rdfex:targetFormat rdfex:JSON;
+  rdfex:container "$.submodels[?(@.idShort=='Nameplate')].submodelElements[?(@.idShort=='SerialNumber')]";
+  rdfex:snippet '{"value": "${?serialNo}"}'.

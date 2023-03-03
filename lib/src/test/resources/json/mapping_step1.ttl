@@ -1,14 +1,13 @@
-@prefix poke: <http://www.olif.com/tests/ontologies/pokemon#>.
-@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>.
+@prefix rdfex: <http://www.w3id.org/hsu-aut/rdfex#>.
 
-<#PokemonIdMapping> a ol:DataMap;
-	ol:ontologicalSource [
-		ol:source "pokemon.ttl";
-		ol:sourceType ol:File;
-		ol:queryLanguage ol:Sparql;
-		ol:query '''
+<#PokemonIdMapping> a rdfex:DataMap;
+	rdfex:ontologicalSource [
+		rdfex:source "pokemon.ttl";
+		rdfex:sourceType rdfex:File;
+		rdfex:queryLanguage rdfex:Sparql;
+		rdfex:query '''
 		PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-		PREFIX poke: <http://www.olif.com/tests/ontologies/pokemon#>
+		PREFIX poke: <http://www.example.com/tests/ontologies/pokemon#>
 		SELECT 
 			?pokemon 
 			(STRAFTER(STR(?pokemon), '#') AS ?idString)
@@ -27,8 +26,8 @@
 		}'''
 	];
   
-	ol:targetFormat ol:JSON;
-	ol:container "$";
-	ol:snippet '{"id":${?id}, "name": {"english":"${?nameEn}", "french":"${?nameFr}", "german":"${?nameDe}"}}'.
+	rdfex:targetFormat rdfex:JSON;
+	rdfex:container "$";
+	rdfex:snippet '{"id":${?id}, "name": {"english":"${?nameEn}", "french":"${?nameFr}", "german":"${?nameDe}"}}'.
 	
 	

@@ -1,11 +1,11 @@
-@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>.
+@prefix rdfex: <http://www.w3id.org/hsu-aut/rdfex#>.
 
-<#ParameterMapping> a ol:DataMap;
-  ol:ontologicalSource [
-    ol:source "robotConfig_ABC.ttl";
-    ol:sourceType ol:File;
-    ol:queryLanguage ol:Sparql;
-    ol:query '''
+<#ParameterMapping> a rdfex:DataMap;
+  rdfex:ontologicalSource [
+    rdfex:source "robotConfig_ABC.ttl";
+    rdfex:sourceType rdfex:File;
+    rdfex:queryLanguage rdfex:Sparql;
+    rdfex:query '''
       PREFIX ex: <http://www.example.org/robots#>
       SELECT ?parameterName ?parameterValue WHERE {
         ex:Robot_ABC ex:hasParameter ?parameter.
@@ -13,9 +13,9 @@
           ex:hasValue ?parameterValue.
       } ORDER BY ?parameterName'''	# Just for XML comparison 
   ];
-  ol:targetFormat ol:XML;
-  ol:container "/ParamWithValueList/parameters";
-  ol:snippet '''
+  rdfex:targetFormat rdfex:XML;
+  rdfex:container "/ParamWithValueList/parameters";
+  rdfex:snippet '''
 	<ParamWithValue>
       <name>length_${?parameterName}</name>
       <typeCode>mm</typeCode>

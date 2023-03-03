@@ -3,14 +3,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>de.hsu-hh.aut.olif</groupId>
+		<groupId>de.hsu-hh.aut.rdfex</groupId>
 		<artifactId>parent</artifactId>
 		<version>0.0.3</version>
 	</parent>
 
-	<artifactId>olif-cli</artifactId>
-	<name>Olif CLI</name>
-	<description>Olif mapping application built as a CLI</description>
+	<artifactId>rdfex-cli</artifactId>
+	<name>RDFex CLI</name>
+	<description>RDFex mapping application built as a CLI</description>
 
 	<dependencies>
 		<dependency>
@@ -19,8 +19,8 @@
 			<version>1.4</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.aut.olif</groupId>
-			<artifactId>olif-lib</artifactId>
+			<groupId>de.hsu-hh.aut.rdfex</groupId>
+			<artifactId>rdfex-lib</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
@@ -50,7 +50,7 @@
 							<archive>
 								<manifest>
 									<addClasspath>true</addClasspath>
-									<mainClass>olif.cli.Main</mainClass>
+									<mainClass>rdfex.cli.Main</mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>

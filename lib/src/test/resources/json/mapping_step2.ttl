@@ -1,13 +1,12 @@
-@prefix poke: <http://www.olif.com/tests/ontologies/pokemon#>.
-@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>.
+@prefix rdfex: <http://www.w3id.org/hsu-aut/rdfex#>.
 
-<#PokemonIdMapping> a ol:DataMap;
-	ol:ontologicalSource [
-		ol:source "pokemon.ttl";
-		ol:sourceType ol:File;
-		ol:queryLanguage ol:Sparql;
-		ol:query '''
-		PREFIX poke: <http://www.olif.com/tests/ontologies/pokemon#>
+<#PokemonIdMapping> a rdfex:DataMap;
+	rdfex:ontologicalSource [
+		rdfex:source "pokemon.ttl";
+		rdfex:sourceType rdfex:File;
+		rdfex:queryLanguage rdfex:Sparql;
+		rdfex:query '''
+		PREFIX poke: <http://www.example.com/tests/ontologies/pokemon#>
 		PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 		SELECT ?pokemon (STRAFTER(STR(?pokemon), '#') AS ?idString) (xsd:integer (?idString) AS ?id) ?typeName ?attack ?defense ?hp ?specialAttack ?specialDefense ?speed
@@ -26,9 +25,9 @@
 		}'''
 	];
   
-	ol:targetFormat ol:JSON;
-	ol:container "$.[?(@.id==${?id})]";
-	ol:snippet '''
+	rdfex:targetFormat rdfex:JSON;
+	rdfex:container "$.[?(@.id==${?id})]";
+	rdfex:snippet '''
 			{"type": [
 				"${?typeName}"
 			],

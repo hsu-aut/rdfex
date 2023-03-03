@@ -4,14 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>de.hsu-hh.aut.olif</groupId>
+		<groupId>de.hsu-hh.aut.rdfex</groupId>
 		<artifactId>parent</artifactId>
 		<version>0.0.3</version>
 	</parent>
 
-	<artifactId>olif-lib</artifactId>
-	<name>Olif Lib</name>
-	<description>Olif Library to be integrated into Java projects</description>
+	<artifactId>rdfex-lib</artifactId>
+	<name>RDFex Lib</name>
+	<description>RDFex Library to be integrated into Java projects</description>
 
 	<build>
 		<plugins>
@@ -54,7 +54,7 @@
 					<transformers>
 						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-							<mainClass>olif.cli.Main</mainClass>
+							<mainClass>rdfex.cli.Main</mainClass>
 							<!-- https://issues.apache.org/jira/browse/LOG4J2-2537 -->
 							<manifestEntries>
 								<Multi-Release>true</Multi-Release>

@@ -1,29 +1,29 @@
 @prefix p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> .
-@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>
+@prefix rdfex: <http://www.w3id.org/hsu-aut/rdfex#>
 
-<#PersonMapping> a ol:DataMap;
-	ol:ontologicalSource [
-		ol:source "persons.ttl";
-		ol:sourceType ol:File;
-		ol:queryLanguage ol:Sparql;
-		ol:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person WHERE {?person a p:Person}" 
+<#PersonMapping> a rdfex:DataMap;
+	rdfex:ontologicalSource [
+		rdfex:source "persons.ttl";
+		rdfex:sourceType rdfex:File;
+		rdfex:queryLanguage rdfex:Sparql;
+		rdfex:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person WHERE {?person a p:Person}" 
 	];
   
-	ol:targetFormat ol:XML;
-	ol:container "/characters";
-	ol:snippet "<character id='${?person}'></character>".
+	rdfex:targetFormat rdfex:XML;
+	rdfex:container "/characters";
+	rdfex:snippet "<character id='${?person}'></character>".
 	
 	
 
-<#PersonAttributeMapping> a ol:DataMap;
-	ol:ontologicalSource [
-		ol:source "persons.ttl";
-		ol:sourceType ol:File;
-		ol:queryLanguage ol:Sparql;
-		ol:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person ?firstName ?lastName ?hairColor WHERE {?person a p:Person; p:hasFirstName ?firstName; p:hasLastName ?lastName; p:hasHairColor ?hairColor}" 
+<#PersonAttributeMapping> a rdfex:DataMap;
+	rdfex:ontologicalSource [
+		rdfex:source "persons.ttl";
+		rdfex:sourceType rdfex:File;
+		rdfex:queryLanguage rdfex:Sparql;
+		rdfex:query "PREFIX p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> SELECT ?person ?firstName ?lastName ?hairColor WHERE {?person a p:Person; p:hasFirstName ?firstName; p:hasLastName ?lastName; p:hasHairColor ?hairColor}" 
 	];
 	
-	ol:targetFormat ol:XML;
-	ol:container "characters/character[@id='${?person}']";
-	ol:snippet "<firstName>${?firstName}</firstName><lastName>${?lastName}</lastName><hair>${?hairColor}</hair>".
+	rdfex:targetFormat rdfex:XML;
+	rdfex:container "characters/character[@id='${?person}']";
+	rdfex:snippet "<firstName>${?firstName}</firstName><lastName>${?lastName}</lastName><hair>${?hairColor}</hair>".
 	

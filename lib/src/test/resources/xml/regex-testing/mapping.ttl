@@ -1,14 +1,14 @@
 @prefix p: <http://www.hsu-hh.de/aut/ontologies/owl2xml/persons#> .
-@prefix ol: <http://www.hsu-hh.de/aut/ontologies/olif#>
+@prefix rdfex: <http://www.w3id.org/hsu-aut/rdfex#>
 
-<#PersonMapping> a ol:DataMap;
-	ol:ontologicalSource [
-		ol:source "numbers.ttl";
-		ol:sourceType ol:File;
-		ol:queryLanguage ol:Sparql;
-		ol:query "PREFIX num: <http://www.hsu-hh.de/aut/ontologies/owl2xml/numbers#> SELECT ?number ?numberValue WHERE {?number a num:Number. ?number num:hasValue ?numberValue.}" 
+<#PersonMapping> a rdfex:DataMap;
+	rdfex:ontologicalSource [
+		rdfex:source "numbers.ttl";
+		rdfex:sourceType rdfex:File;
+		rdfex:queryLanguage rdfex:Sparql;
+		rdfex:query "PREFIX num: <http://www.hsu-hh.de/aut/ontologies/owl2xml/numbers#> SELECT ?number ?numberValue WHERE {?number a num:Number. ?number num:hasValue ?numberValue.}" 
 	];
   
-	ol:targetFormat ol:XML;
-	ol:container "/numbers[@testAttribute='Test']/number[@id='${?number}']";
-	ol:snippet "${?numberValue}".
+	rdfex:targetFormat rdfex:XML;
+	rdfex:container "/numbers[@testAttribute='Test']/number[@id='${?number}']";
+	rdfex:snippet "${?numberValue}".
