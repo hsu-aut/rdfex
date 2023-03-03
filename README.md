@@ -45,24 +45,24 @@ Define mappings using the RDFex mapping language in a so-called _mapping model_.
     rdfex:source "parameters.ttl";
 	  rdfex:sourceType rdfex:File;
     rdfex:queryLanguage ql:Sparql;
-    rdfex:query 
-      "PREFIX ex: <http://www.example.com/robots/example#> 
+    rdfex:query '''
+      PREFIX ex: <http://www.example.com/robots/example#> 
       SELECT ?parameterName ?parameterValue WHERE {
         ?parameter a ex:Parameter.
         ex:RobotConfiguration_ABC a ex:RobotConfiguration;
         ex:hasParameter ?parameter.
         ?parameter ex:hasName ?parameterName;
           ex:hasValue ?parameterValue.
-      }"
+      }'''
   ];
   rdfex:targetFormat rdfex:XML;
   rdfex:container "/parameters";
-  rdfex:snippet 
-   "<ParamWithValue>
+  rdfex:snippet '''
+    <ParamWithValue>
       <name>length_${?parameterName}</name>
       <typeCode>mm</typeCode>
       <value >${?parameterValue} mm</value>
-    </ParamWithValue>".
+    </ParamWithValue>'''.
     
 # Additional mappings...
 ```
